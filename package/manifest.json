@@ -2,7 +2,7 @@
   "name": "GtfoCrashTestDummies",
   "version_number": "1.0.0",
   "website_url": "https://github.com/mindattic/GTFO.CrashTestDummies",
-  "description": "Floods the zone you drop into with a crowd of weak enemies (20x by default) so you have targets for testing other mods.",
+  "description": "Scatters 100 sleeping Strikers 10-100 m from your drop point at the level's own spawn spots, so you have targets to stealth or shoot while testing other mods.",
   "dependencies": [
     "BepInEx-BepInExPack_GTFO-3.2.3"
   ]

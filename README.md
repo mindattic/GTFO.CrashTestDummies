@@ -1,7 +1,7 @@
 # GTFO.CrashTestDummies
 
-Dev repo for **GTFO.CrashTestDummies**, a BepInEx IL2CPP plugin for GTFO that scatters sleeping
-enemies of several types through the level around your drop point, so you have targets to stealth
+Dev repo for **GTFO.CrashTestDummies**, a BepInEx IL2CPP plugin for GTFO that scatters 100 sleeping
+Strikers through the level around your drop point, so you have targets to stealth
 or shoot while testing other mods.
 
 ## How it works
@@ -13,15 +13,14 @@ or shoot while testing other mods.
   starts a coroutine that waits `SpawnDelaySeconds`, then gathers candidate spots from every room
   (`AIG_CourseNode.s_allNodes`) near the drop point: each room's designer-placed
   `LG_Area.m_enemySpawnPoints` (with their authored facing) plus a few `GetRandomPositionInside()`
-  points. The candidates are shuffled, then `SpawnPicker` keeps up to `SpawnCount` (default 40) that
+  points. The candidates are shuffled, then `SpawnPicker` keeps up to `SpawnCount` (default 100) that
   are between `SkipFirstMeters` (10) and `MaxDistanceMeters` (100) from the drop point and at least
   `MinSpacingMeters` (3) from each other. Each is spawned with `EnemyAllocator.Current.SpawnEnemy`
   on its own room's course node, in `Hibernate` mode unless `SpawnAsSleepers` is off.
-- Enemy types come from `GameDataBlockBase<EnemyDataBlock>`, limited to enabled blocks with a
-  built prefab: every block whose name contains `EnemyNameFilter` (default `Hibernate`, the game's
-  own sleeper variants) and whose max health is at most `MaxEnemyHealth` (200, keeps Tanks and
-  Mothers out). Each enemy picks one at random. If nothing matches, the weakest enemy in the game
-  data is used. The chosen types are logged to `BepInEx/LogOutput.log`.
+- The dummy type comes from `GameDataBlockBase<EnemyDataBlock>`, limited to enabled blocks with a
+  built prefab: of those whose name contains `EnemyNameFilter` (default `Striker_Hibernate`, the
+  plain sleeping Striker), the one with the lowest max health is used. If nothing matches, it uses
+  the weakest enemy in the game data. The chosen type is logged to `BepInEx/LogOutput.log`.
 - `LevelPatches` needs its class-level `[HarmonyPatch]`: `PatchAll` skips classes without one.
 
 The spawn API and patch points were taken from ExtraEnemyCustomization's `SpawnEnemyAbility` and
@@ -57,15 +56,14 @@ dotnet test tests/GTFO.CrashTestDummies.Core.Tests/GTFO.CrashTestDummies.Core.Te
 ```
 
 No game install or BepInEx profile needed. This covers `GTFO.CrashTestDummies.Core`: spot
-picking (10-100 m band, spacing, count cap), enemy-type selection (every match under the health cap, (weakest name match,
+picking (10-100 m band, spacing, count cap), enemy-type selection (weakest name match,
 Big Strikers skipped, disabled/no-prefab/zero-health blocks excluded, fallback when nothing
 matches), and the once-per-level host-only gate.
 
 The Harmony patches and game calls in `src/GTFO.CrashTestDummies/` only run inside the game, so
 check those in-game after `build.ps1`: launch any rundown in the profile. `LogOutput.log` should show
 `GTFO.CrashTestDummies v1.0.0 loaded`, then on landing the chosen dummy type and
-the chosen enemy types and
-`spawning 40 enemies (Hibernate) across <n> types.`
+`spawning 100x 'Striker_Hibernate' (Hibernate).`
 
 ## Versioning
 

@@ -10,7 +10,6 @@ internal static class Settings
     public static ConfigEntry<float> MaxDistanceMeters = null!;
     public static ConfigEntry<float> MinSpacingMeters = null!;
     public static ConfigEntry<string> EnemyNameFilter = null!;
-    public static ConfigEntry<float> MaxEnemyHealth = null!;
     public static ConfigEntry<float> SpawnDelaySeconds = null!;
     public static ConfigEntry<bool> SpawnAsSleepers = null!;
 
@@ -21,7 +20,7 @@ internal static class Settings
             "Master switch. Disable to stop dummies from spawning without uninstalling the mod.");
 
         SpawnCount = config.Bind(
-            "Spawning", "SpawnCount", 40,
+            "Spawning", "SpawnCount", 100,
             "How many enemies to scatter between SkipFirstMeters and MaxDistanceMeters, at the level's own enemy spawn " +
             "spots and random walkable points in each room.");
 
@@ -38,14 +37,10 @@ internal static class Settings
             "Minimum distance between any two enemies, just enough to keep them from overlapping.");
 
         EnemyNameFilter = config.Bind(
-            "Spawning", "EnemyNameFilter", "Hibernate",
-            "Case-insensitive substring match against the game's enemy data block names; every match (under MaxEnemyHealth) " +
-            "is used, picked at random per enemy. The game's own sleepers are named '..._Hibernate'. " +
+            "Spawning", "EnemyNameFilter", "Striker_Hibernate",
+            "Case-insensitive substring match against the game's enemy data block names; of the matches, the one with the " +
+            "lowest max health is spawned. Default is the plain sleeping Striker. " +
             "If nothing matches, the mod falls back to whichever enemy has the lowest max health.");
-
-        MaxEnemyHealth = config.Bind(
-            "Spawning", "MaxEnemyHealth", 200f,
-            "Enemy types with more max health than this are left out, which keeps bosses like Tanks and Mothers away.");
 
         SpawnDelaySeconds = config.Bind(
             "Spawning", "SpawnDelaySeconds", 2f,

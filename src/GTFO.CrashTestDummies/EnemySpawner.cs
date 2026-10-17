@@ -12,17 +12,16 @@ namespace GTFO.CrashTestDummies;
 
 internal static class EnemySpawner
 {
-    private const int RandomPointsPerRoom = 6;
+    private const int RandomPointsPerRoom = 15;
 
     // A room's centre can sit well away from its far corners, so look at rooms a bit past the max distance.
     private const float RoomReachMargin = 40f;
 
-    private static List<EnemyDataBlock>? _cachedTypes;
+    private static EnemyDataBlock? _cachedTarget;
     private static string? _cachedFilter;
-    private static float _cachedMaxHealth;
 
     /// <summary>
-    /// Waits briefly for the level to settle, then scatters sleeping enemies of several types around the level
+    /// Waits briefly for the level to settle, then scatters sleeping enemies around the level
     /// between SkipFirstMeters and MaxDistanceMeters from <paramref name="localAgent"/>'s drop point.
     /// Host-only: enemy spawning is authoritative on the master client.
     /// </summary>
@@ -39,8 +38,8 @@ internal static class EnemySpawner
             yield break;
         }
 
-        var types = GetEnemyTypes();
-        if (types.Count == 0)
+        var target = GetTargetEnemy();
+        if (target == null)
         {
             Plugin.Logger.LogError("CrashTestDummies: no eligible enemy data block found - nothing spawned.");
             yield break;
@@ -63,13 +62,12 @@ internal static class EnemySpawner
             Plugin.Logger.LogWarning(
                 $"CrashTestDummies: only {picks.Count} of {Settings.SpawnCount.Value} spots fit the distance and spacing rules.");
 
-        Plugin.Logger.LogInfo($"CrashTestDummies: spawning {picks.Count} enemies ({mode}) across {types.Count} types.");
+        Plugin.Logger.LogInfo($"CrashTestDummies: spawning {picks.Count}x '{target.name}' ({mode}).");
 
         for (var i = 0; i < picks.Count; i++)
         {
             var spot = spots[picks[i]];
-            var type = types[UnityEngine.Random.Range(0, types.Count)];
-            EnemyAllocator.Current.SpawnEnemy(type.persistentID, spot.Node, mode, spot.Position, spot.Rotation, null);
+            EnemyAllocator.Current.SpawnEnemy(target.persistentID, spot.Node, mode, spot.Position, spot.Rotation, null);
 
             if (i % 5 == 4)
                 yield return null;
@@ -126,16 +124,15 @@ internal static class EnemySpawner
 
     private static System.Numerics.Vector3 ToNumerics(Vector3 v) => new(v.x, v.y, v.z);
 
-    private static List<EnemyDataBlock> GetEnemyTypes()
+    private static EnemyDataBlock? GetTargetEnemy()
     {
         var filter = Settings.EnemyNameFilter.Value;
-        var maxHealth = Settings.MaxEnemyHealth.Value;
-        if (_cachedTypes != null && _cachedFilter == filter && _cachedMaxHealth == maxHealth)
-            return _cachedTypes;
+        if (_cachedTarget != null && _cachedFilter == filter)
+            return _cachedTarget;
 
         var allBlocks = GameDataBlockBase<EnemyDataBlock>.GetAllBlocks();
         if (allBlocks == null || allBlocks.Length == 0)
-            return new List<EnemyDataBlock>();
+            return null;
 
         var blocksById = new Dictionary<uint, EnemyDataBlock>();
         var candidates = new List<EnemyCandidate>();
@@ -154,17 +151,17 @@ internal static class EnemySpawner
                 balancing?.Health.HealthMax ?? 0f));
         }
 
-        var (chosen, filterUnmatched) = DummySelector.SelectAll(candidates, filter, maxHealth);
-        if (filterUnmatched)
+        var selection = DummySelector.Select(candidates, filter);
+        if (selection.FilterUnmatched)
             Plugin.Logger.LogWarning(
-                $"CrashTestDummies: no enemy matched filter '{filter}' under {maxHealth} health, falling back to the weakest enemy.");
+                $"CrashTestDummies: no enemy matched filter '{filter}', falling back to the weakest enemy by max health.");
 
-        foreach (var c in chosen)
-            Plugin.Logger.LogInfo($"CrashTestDummies: enemy type '{c.Name}' (id {c.Id}, max health {c.HealthMax}).");
+        var chosen = selection.Chosen;
+        if (chosen != null)
+            Plugin.Logger.LogInfo($"CrashTestDummies: dummy type is '{chosen.Name}' (id {chosen.Id}, max health {chosen.HealthMax}).");
 
-        _cachedTypes = chosen.Select(c => blocksById[c.Id]).ToList();
+        _cachedTarget = chosen != null ? blocksById[chosen.Id] : null;
         _cachedFilter = filter;
-        _cachedMaxHealth = maxHealth;
-        return _cachedTypes;
+        return _cachedTarget;
     }
 }

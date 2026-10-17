@@ -131,25 +131,14 @@ public class DummySelectorTests
     }
 
     [Test]
-    public void SelectAll_ReturnsEveryMatchUnderTheHealthCap()
+    public void StrikerSleeperFilter_PicksThePlainStrikerSleeper()
     {
         var strikerSleeper = Enemy(20, "Striker_Hibernate", 20f);
         var bigSleeper = Enemy(21, "Striker_Big_Hibernate", 120f);
-        var tankSleeper = Enemy(22, "Tank_Hibernate", 1000f);
 
-        var (chosen, unmatched) = DummySelector.SelectAll(new[] { strikerSleeper, Striker, bigSleeper, tankSleeper }, "hibernate", 200f);
+        var result = DummySelector.Select(new[] { bigSleeper, Striker, strikerSleeper }, "Striker_Hibernate");
 
-        Assert.That(chosen, Is.EqualTo(new[] { strikerSleeper, bigSleeper }));
-        Assert.That(unmatched, Is.False);
-    }
-
-    [Test]
-    public void SelectAll_NoMatch_FallsBackToWeakestOverall()
-    {
-        var (chosen, unmatched) = DummySelector.SelectAll(new[] { Tank, Shooter, Baby }, "Hibernate", 200f);
-
-        Assert.That(chosen, Is.EqualTo(new[] { Baby }));
-        Assert.That(unmatched, Is.True);
+        Assert.That(result.Chosen, Is.EqualTo(strikerSleeper));
     }
 
     [Test]

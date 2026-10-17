@@ -28,3 +28,4 @@ _Nothing recorded yet._
 | G.CTD-T5 | 2026-10-16 | chore | open | Clean up code and docs: remove dead code, stale comments and outdated or duplicated docs, and simplify where behaviour doesn't change (/simplify); tests stay green | user request 2026-10-16: approved repo sweep |
 | G.CTD-T6 | 2026-10-16 | docs | open | Bring README.md up to date with the code as it is now (what it is, setup, usage, commands, current state), following codex-standard/README-STYLE.md; README.htm regenerated if the repo has one | user request 2026-10-16: approved repo sweep |
 | G.CTD-T7 | 2026-10-16 | chore | closed | Add .gitignore, README.md, build.ps1, docs, package, reference, src, tests | — |
+| G.CTD-T8 | 2026-10-17 | feature | closed | Spawn 100 sleeping Strikers (the most basic enemy) 10-100 m from the drop point instead of a mix of sleeper types, as the user asked | SpawnPickerTests; DummySelectorTests.StrikerSleeperFilter_PicksThePlainStrikerSleeper |

@@ -45,27 +45,4 @@ public static class DummySelector
 
         return new DummySelection(weakest, filterUnmatched);
     }
-
-    /// <summary>
-    /// Every spawnable enemy whose name contains <paramref name="nameFilter"/> (case-insensitive) and whose max
-    /// health is at most <paramref name="maxHealth"/>. If none qualify, falls back to <see cref="Select"/>'s single pick.
-    /// </summary>
-    public static (List<EnemyCandidate> Chosen, bool FilterUnmatched) SelectAll(
-        IEnumerable<EnemyCandidate> candidates, string? nameFilter, float maxHealth)
-    {
-        var list = candidates.ToList();
-        if (!string.IsNullOrWhiteSpace(nameFilter))
-        {
-            var matches = list
-                .Where(c => c.IsSpawnable && c.HealthMax <= maxHealth
-                            && c.Name != null && c.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            if (matches.Count > 0)
-                return (matches, false);
-        }
-
-        var single = Select(list, null).Chosen;
-        return (single != null ? new List<EnemyCandidate> { single } : new List<EnemyCandidate>(),
-            !string.IsNullOrWhiteSpace(nameFilter));
-    }
 }
