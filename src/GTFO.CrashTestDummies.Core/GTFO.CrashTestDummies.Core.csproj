@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+  Pure spawn logic (count math, dummy-type selection, once-per-expedition gate) with no
+  BepInEx/Il2Cpp/Harmony dependency, so it can be unit tested without the game installed - see
+  tests/GTFO.CrashTestDummies.Core.Tests. Ships alongside GTFO.CrashTestDummies.dll at runtime.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+</Project>

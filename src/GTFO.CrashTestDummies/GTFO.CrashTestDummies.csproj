@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Mod manager profile to build against and deploy into. r2modman users: override BepInEx directly. -->
+    <GameName>GTFO</GameName>
+    <Profile>Easy Mode DEV</Profile>
+
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <DebugType>none</DebugType>
+    <AssemblyName>GTFO.CrashTestDummies</AssemblyName>
+    <RootNamespace>GTFO.CrashTestDummies</RootNamespace>
+
+    <BepInEx>$(AppData)\Thunderstore Mod Manager\DataFolder\$(GameName)\profiles\$(GameName) - $(Profile)\BepInEx</BepInEx>
+    <OutputPath>$(BepInEx)\plugins\GTFO.CrashTestDummies\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" BeforeTargets="PostBuildEvent">
+    <Delete Files="$(OutputPath)$(AssemblyName).deps.json" />
+  </Target>
+
+  <!-- BepInEx + HarmonyX + Il2CppInterop core -->
+  <ItemGroup>
+    <Reference Include="$(BepInEx)\core\0Harmony.dll" Private="false" />
+    <Reference Include="$(BepInEx)\core\BepInEx.Core.dll" Private="false" />
+    <Reference Include="$(BepInEx)\core\BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="$(BepInEx)\core\Il2CppInterop.Common.dll" Private="false" />
+    <Reference Include="$(BepInEx)\core\Il2CppInterop.Runtime.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- Interop game assemblies (GameData, Enemies, Player, UnityEngine, etc.) -->
+  <ItemGroup>
+    <Reference Include="$(BepInEx)\interop\*.dll" Private="false" />
+    <Reference Remove="$(BepInEx)\interop\netstandard.dll" />
+  </ItemGroup>
+
+  <!-- Pure spawn logic, shared with tests/GTFO.CrashTestDummies.Core.Tests. -->
+  <ItemGroup>
+    <ProjectReference Include="..\GTFO.CrashTestDummies.Core\GTFO.CrashTestDummies.Core.csproj" />
+  </ItemGroup>
+
+</Project>
