@@ -4,6 +4,14 @@ A testing tool: when you drop into an expedition, 100 sleeping Strikers are scat
 through the level 10-100 m from where you land, at the level's own enemy spawn spots, so you always
 have something to stealth or shoot while trying out other mods. The elevator drop area stays clear.
 
+## Infinite ammo and health
+
+**Insert** toggles infinite ammo (every gun and tool stays full, no reloads) and **Delete** infinite
+health (no damage to you; bots and teammates are unaffected), each announced as a warden message.
+Both start off. They're the same two keys every GTFO.* mod has, from one shared copy of the code
+written in GTFO.EZ; with several of the mods installed, only one answers, so a press never toggles
+twice.
+
 ## Config
 
 `BepInEx/config/MindAttic.GTFO.CrashTestDummies.cfg`:
