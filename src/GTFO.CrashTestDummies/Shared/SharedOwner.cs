@@ -1,4 +1,4 @@
-// Generated from GTFO.EZ src/GTFO.EZ/Shared/SharedOwner.cs (a2ed1c2) - don't edit here.
+// Generated from GTFO.EZ src/GTFO.EZ/Shared/SharedOwner.cs (ba7826b) - don't edit here.
 // Change GTFO.EZ's copy and run GTFO.EZ/tools/publish-shared.ps1.
 using System;
 using System.Reflection;
@@ -20,6 +20,7 @@ internal static class SharedOwner
         "MindAttic.GTFO.EZ",
         "MindAttic.GTFO.AbsurdWeapons",
         "MindAttic.GTFO.AbsurdMoves",
+        "MindAttic.GTFO.AbsurdItems",
         "MindAttic.GTFO.CrashTestDummies",
     };
 
