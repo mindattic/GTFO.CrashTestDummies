@@ -47,3 +47,4 @@ _Nothing recorded yet._
 | G.CTD-T24 | 2026-10-18 | fix | closed | README.md 'How it works' said only door ambush and ambient use the visibility filter (all three triggers do) and that DoorAmbush remembers each door's previous eDoorStatus (it only remembers which doors were alarm-locked); package/README.md had neither claim | 68c15c9 |
 | G.CTD-T25 | 2026-10-18 | chore | closed | Shared code republished from GTFO.EZ: SharedOwner.Order now lists GTFO.AbsurdItems | 41368bd |
 | G.CTD-T26 | 2026-10-18 | feature | closed | Master switch: [0. Mod] Enabled as the cfg's first entry; off means the mod loads nothing (user request) | — |
+| G.CTD-T27 | 2026-10-18 | feature | closed | Shared code republished from GTFO.EZ: SharedOwner treats a switched-off GTFO.* mod as not installed, IsActive/TryGetSetting helpers | a00882c |
