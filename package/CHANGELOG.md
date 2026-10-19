@@ -17,7 +17,9 @@
 - Never-seen guarantee, now everywhere: a shared out-of-sight check (`General.OutOfSightHalfAngleDegrees`,
   default 70°) - outside every player's view cone, or blocked by a line-of-sight check even if inside
   it - now gates all three spawn triggers (previously only the ambient scatter had it) and the cleanup
-  despawn. Combined with cleanup, nothing this mod does should ever visibly pop in or out.
+  despawn. Combined with cleanup, nothing this mod does should ever visibly pop in or out. The host
+  can't tell where other players and bots are looking, so for them anything in their line of sight
+  counts as seen, whichever way they face.
 - The level-start scatter is guaranteed to run, and claim its share of the population cap, before the
   ambient scatter or cleanup loop start - so the initial 100 is never crowded out regardless of how
   aggressively `Ambient.*` is tuned.

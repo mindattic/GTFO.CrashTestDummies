@@ -26,17 +26,17 @@ internal static class Visibility
             if (agent == null || !agent.Alive)
                 continue;
 
-            var cam = agent.FPSCamera;
-            if (cam == null)
-                continue;
-
             // Aim at body height, not the feet: a line to the feet grazes the floor at its end and
             // reads as blocked. Only walls and level geometry count as cover - the enemy's own
             // colliders (or another enemy's) don't hide it.
             var eye = agent.EyePosition;
             var target = point + Vector3.up * BodyHeight;
-            var toPoint = target - eye;
-            if (Vector3.Angle(cam.transform.forward, toPoint) > viewHalfAngleDegrees)
+
+            // Only the local player has an FPSCamera; on the host every client and bot has none. We
+            // don't know where they're looking, so treat them as looking every way at once: for them
+            // only the line-of-sight check below can hide a point.
+            var cam = agent.FPSCamera;
+            if (cam != null && Vector3.Angle(cam.transform.forward, target - eye) > viewHalfAngleDegrees)
                 continue;
 
             if (!Physics.Linecast(eye, target, LayerManager.MASK_WORLD))

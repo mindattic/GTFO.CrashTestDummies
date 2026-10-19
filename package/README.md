@@ -13,8 +13,9 @@ its own origin (not one band covering the whole level):
 - **Ambient trickle**: every 60 seconds, 50-100 more are scattered 10-100 m from wherever you
   currently are.
 
-Every spawn - all three triggers - only ever picks a spot outside every player's current view (and
-not just behind a thin wall: a line-of-sight check catches that too), so nothing ever visibly pops in.
+Every spawn - all three triggers - only ever picks a spot no player can currently see: out of the
+host's view or behind a wall, and behind a wall for everyone else (the host can't tell which way
+other players and bots are facing), so nothing ever visibly pops in.
 
 **Population cap, not a one-time budget.** Up to 300 of this mod's dummies may be alive at once
 (combined across all three triggers). It's a ceiling on the current count, not a lifetime total:
@@ -38,7 +39,7 @@ twice.
 |---|---|---|
 | `General.Enabled` | `true` | Master on/off switch. |
 | `General.MaxTotalEnemies` | `300` | Population cap: how many of this mod's dummies may be alive at once, combined across all triggers. |
-| `General.OutOfSightHalfAngleDegrees` | `70` | Used by every trigger and by cleanup: a spot is hidden from a player if it's outside this many degrees of the centre of their view, or something blocks line of sight to it. |
+| `General.OutOfSightHalfAngleDegrees` | `70` | Used by every trigger and by cleanup: a spot is hidden from the host if it's outside this many degrees of the centre of their view, or something blocks line of sight to it. Other players and bots count as looking every way, so only a blocked line of sight hides a spot from them. |
 | `Spawning.SpawnCount` | `100` | How many enemies the on-drop scatter spawns. |
 | `Spawning.SkipFirstMeters` | `10` | Nothing spawns closer than this to the drop point. |
 | `Spawning.MaxDistanceMeters` | `100` | Nothing spawns farther than this from the drop point. |

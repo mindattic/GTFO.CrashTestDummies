@@ -46,7 +46,8 @@ internal static class Settings
             "Used by every spawn trigger and by cleanup: a spot is treated as hidden from a player if it " +
             "falls outside this many degrees of the centre of their view, or something blocks the line of " +
             "sight to it. The bigger this is, the more conservative (and more likely to find nowhere to " +
-            "spawn in a small room).");
+            "spawn in a small room). Only the host's own view has a direction; other players and bots " +
+            "count as looking every way, so only a blocked line of sight hides a spot from them.");
 
         SpawnCount = config.Bind(
             "Spawning", "SpawnCount", 100,

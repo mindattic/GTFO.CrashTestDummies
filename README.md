@@ -25,7 +25,8 @@ default 70°): a candidate point is hidden from a player if it's outside this ma
 centre of their `FPSCamera`'s forward direction (from `PlayerAgent.EyePosition`), *or* if it's inside
 that cone but a `Physics.Linecast` between their eye and the point hits something first (round a
 corner, behind a crate). It's hidden only if every alive player in `PlayerManager.PlayerAgentsInLevel`
-fails to see it.
+fails to see it. Only the local player has an `FPSCamera`, so on the host every client and bot is
+treated as looking every way at once: for them only the linecast can hide a point.
 
 **Startup ordering**: `Post_EnterLevel` runs a `StartupSequence` coroutine that `yield return`s the
 on-drop scatter directly (a nested `IEnumerator` runs to completion before its caller resumes), and
