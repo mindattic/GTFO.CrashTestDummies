@@ -15,12 +15,16 @@ internal static class AmbientSpawner
 {
     private const float MinIntervalSeconds = 1f;
 
-    public static IEnumerator Routine()
+    /// <param name="run">The <see cref="LevelRoutines.Run"/> this loop belongs to; it ends once that level is over.</param>
+    public static IEnumerator Routine(int run)
     {
         while (true)
         {
             // A zero or negative interval would run a full scatter every frame.
             yield return new WaitForSeconds(Math.Max(MinIntervalSeconds, Settings.AmbientIntervalSeconds.Value));
+
+            if (!LevelRoutines.IsCurrent(run))
+                yield break;
 
             if (!Settings.ModEnabled.Value || !Settings.AmbientSpawnEnabled.Value || !SNet.IsMaster)
                 continue;

@@ -45,12 +45,16 @@ internal static class EnemyCleanup
         return damage == null || damage.Health >= damage.HealthMax - 0.01f;
     }
 
-    public static IEnumerator Routine()
+    /// <param name="run">The <see cref="LevelRoutines.Run"/> this loop belongs to; it ends once that level is over.</param>
+    public static IEnumerator Routine(int run)
     {
         while (true)
         {
             // A zero or negative interval would sweep every tracked dummy every frame.
             yield return new WaitForSeconds(Math.Max(MinIntervalSeconds, Settings.CleanupCheckIntervalSeconds.Value));
+
+            if (!LevelRoutines.IsCurrent(run))
+                yield break;
 
             if (!Settings.ModEnabled.Value || !Settings.CleanupEnabled.Value || !SNet.IsMaster)
                 continue;

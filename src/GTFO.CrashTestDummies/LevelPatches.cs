@@ -1,11 +1,9 @@
 using System.Collections;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
 using GTFO.CrashTestDummies.Core;
 using HarmonyLib;
 using LevelGeneration;
 using Player;
 using SNetwork;
-using UnityEngine;
 
 namespace GTFO.CrashTestDummies;
 
@@ -15,24 +13,31 @@ internal static class LevelPatches
 {
     private static readonly SpawnGate Gate = new();
 
-    // CoroutineHost is a plugin-level component that outlives any single expedition, so these infinite
-    // loops have to be stopped by hand when a new level starts building, or retrying a level would stack
-    // up one running loop per attempt.
-    private static Coroutine? _ambientRoutine;
-    private static Coroutine? _cleanupRoutine;
+    // Set once this expedition's startup scatter has been started, so re-entering InLevel in the same
+    // expedition (a checkpoint reload) restarts the ambient and cleanup loops without a second scatter.
+    private static bool _expeditionStarted;
+
+    // Whether the ambient and cleanup loops are running for the current InLevel stay.
+    private static bool _loopsStarted;
 
     [HarmonyPatch(typeof(Builder), nameof(Builder.Build))]
     [HarmonyPrefix]
     private static void Pre_Build()
     {
         Gate.Reset();
+        _expeditionStarted = false;
         EnemyCleanup.ResetForNewExpedition();
+        DoorAmbush.ResetForNewExpedition();
         StopRoutines();
     }
 
-    // The ambient and cleanup loops otherwise only stop at the next Builder.Build, so without this
-    // they keep running - and the ambient loop can keep spawning - all through the success/fail
-    // end screen, right up until the next expedition actually starts generating.
+    // Leaving InLevel ends the level for this mod's purposes: expedition success or fail, aborting to
+    // the lobby, or dropping back to a checkpoint. Without this the loops (and any door ambush still
+    // spawning) only stopped at the next Builder.Build.
+    [HarmonyPatch(typeof(GS_InLevel), nameof(GS_InLevel.Exit))]
+    [HarmonyPostfix]
+    private static void Post_ExitLevel() => StopRoutines();
+
     [HarmonyPatch(typeof(GS_ExpeditionSuccess), nameof(GS_ExpeditionSuccess.Enter))]
     [HarmonyPostfix]
     private static void Post_ExpeditionSuccess() => StopRoutines();
@@ -43,17 +48,8 @@ internal static class LevelPatches
 
     private static void StopRoutines()
     {
-        if (_ambientRoutine != null)
-        {
-            Plugin.CoroutineHostInstance.StopCoroutine(_ambientRoutine);
-            _ambientRoutine = null;
-        }
-
-        if (_cleanupRoutine != null)
-        {
-            Plugin.CoroutineHostInstance.StopCoroutine(_cleanupRoutine);
-            _cleanupRoutine = null;
-        }
+        LevelRoutines.StopAll();
+        _loopsStarted = false;
     }
 
     // The player agent already exists in the elevator while the level is still generating, so the
@@ -63,7 +59,13 @@ internal static class LevelPatches
     private static void Post_EnterLevel()
     {
         if (!Gate.TryBegin(Settings.ModEnabled.Value, SNet.IsMaster))
+        {
+            // Back in the level after leaving it (a checkpoint reload): the loops were stopped on the
+            // way out, so start them again. The drop-point scatter stays once per expedition.
+            if (_expeditionStarted && Settings.ModEnabled.Value && SNet.IsMaster)
+                StartLoops();
             return;
+        }
 
         if (!PlayerManager.TryGetLocalPlayerAgent(out var localAgent) || localAgent == null)
         {
@@ -71,19 +73,34 @@ internal static class LevelPatches
             return;
         }
 
-        Plugin.CoroutineHostInstance.StartCoroutine(StartupSequence(localAgent).WrapToIl2Cpp());
+        _expeditionStarted = true;
+        LevelRoutines.Start(StartupSequence(localAgent, LevelRoutines.Run));
     }
 
     // Runs the initial drop-point scatter to completion before the ambient spawner or cleanup loop get a
     // chance to touch the population cap, so the initial 100 is never starved by a low AmbientIntervalSeconds.
-    private static IEnumerator StartupSequence(PlayerAgent localAgent)
+    private static IEnumerator StartupSequence(PlayerAgent localAgent, int run)
     {
         // Safety-wrapped: an exception thrown mid-scatter must not skip the statements below it and
         // leave ambient spawning and cleanup never started for the whole level.
         yield return CoroutineSafety.Run(EnemySpawner.SpawnRoutine(localAgent), "startup scatter");
 
-        _ambientRoutine = Plugin.CoroutineHostInstance.StartCoroutine(AmbientSpawner.Routine().WrapToIl2Cpp());
-        _cleanupRoutine = Plugin.CoroutineHostInstance.StartCoroutine(EnemyCleanup.Routine().WrapToIl2Cpp());
+        // The level may have ended while the scatter ran; never start loops for a level that's over.
+        if (!LevelRoutines.IsCurrent(run))
+            yield break;
+
+        StartLoops();
+    }
+
+    private static void StartLoops()
+    {
+        if (_loopsStarted)
+            return;
+
+        _loopsStarted = true;
+        var run = LevelRoutines.Run;
+        LevelRoutines.Start(AmbientSpawner.Routine(run));
+        LevelRoutines.Start(EnemyCleanup.Routine(run));
     }
 
     [HarmonyPatch(typeof(LG_SecurityDoor), nameof(LG_SecurityDoor.OnSyncDoorStatusChange))]

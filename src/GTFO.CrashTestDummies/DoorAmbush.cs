@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using AIGraph;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
 using LevelGeneration;
 using SNetwork;
 
@@ -14,6 +13,9 @@ internal static class DoorAmbush
     // "was alarm-locked" fact that's remembered, not just the last status; a door that was never
     // alarm-locked never ambushes, and each one ambushes once.
     private static readonly HashSet<int> AlarmLocked = new();
+
+    // Instance IDs are only meaningful within one generated level.
+    public static void ResetForNewExpedition() => AlarmLocked.Clear();
 
     public static void OnSecurityDoorStatusChanged(LG_SecurityDoor? door, eDoorStatus status)
     {
@@ -38,14 +40,14 @@ internal static class DoorAmbush
         }
 
         Plugin.Logger.LogInfo($"CrashTestDummies: alarm door opened - ambushing the far side near {farNode.Position}.");
-        Plugin.CoroutineHostInstance.StartCoroutine(
+        LevelRoutines.Start(
             EnemySpawner.SpawnAround(
                 farNode.Position,
                 Settings.AmbushSkipFirstMeters.Value,
                 Settings.AmbushMaxDistanceMeters.Value,
                 Settings.MinSpacingMeters.Value,
                 Settings.AmbushCount.Value,
-                point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value)).WrapToIl2Cpp());
+                point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value)));
     }
 
     // A security door's gate is built from the area the players come from (m_linksFrom) into the first

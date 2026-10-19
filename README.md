@@ -73,20 +73,28 @@ drop point):
 - An infinite coroutine loops `yield return new WaitForSeconds(AmbientIntervalSeconds)` (default 60),
   then calls `SpawnAround` centered on the local player's current position with a random count in
   `[AmbientCountMin, AmbientCountMax]` and the shared visibility filter as `isAllowed`.
-- Started from `StartupSequence` only after the on-drop scatter finishes, and the returned `Coroutine`
-  is stopped in `Pre_Build` so retrying a level doesn't stack up extra loops (`CoroutineHost` is a
-  plugin-level component that outlives any single expedition).
+- Started from `StartupSequence` only after the on-drop scatter finishes (and only if the level hasn't
+  ended meanwhile).
 
 **Cleanup** (`EnemyCleanup.cs`; `CleanupCheckIntervalSeconds`/`CleanupAfterSeconds`, default 30 s / 300 s):
 
 - Every spawned `EnemyAgent` (from all three triggers) is registered with `EnemyCleanup.Track` the
   moment `EnemyAllocator.Current.SpawnEnemy` returns it. `EnemyCleanup.AliveCount` prunes dead/null
   entries as it counts, and is what `SpawnAround` checks against `MaxTotalEnemies` before spawning.
-- A second infinite coroutine, also stopped in `Pre_Build`, wakes every `CleanupCheckIntervalSeconds`
+- A second infinite coroutine wakes every `CleanupCheckIntervalSeconds`
   and recycles any tracked dummy that's both older than `CleanupAfterSeconds` and currently hidden
   (same `Visibility` check) by calling `agent.m_replicator.Despawn()` - the same `SNet_Replicator`
   method the game's own networked spawn/despawn lifecycle uses, so it's removed cleanly for every
   client, not just locally destroyed.
+
+**Level lifetime** (`LevelRoutines.cs`): `CoroutineHost` is a plugin-level component that outlives any
+single expedition, so every coroutine started for a level - the startup scatter, the ambient and cleanup
+loops, and each door ambush - is started through `LevelRoutines` and stopped together when the level
+ends: a postfix on `GS_InLevel.Exit` (success, fail, abort to lobby, checkpoint), the success/fail
+screens' `Enter`, and `Pre_Build`. Each stop also bumps `LevelRoutines.Run`; the loops and
+`StartupSequence` check the value they started with after every wait, so nothing outlives its level.
+Re-entering `InLevel` in the same expedition (a checkpoint reload) restarts the ambient and cleanup
+loops, but not the once-per-expedition drop-point scatter.
 
 `LevelPatches` needs its class-level `[HarmonyPatch]`: `PatchAll` skips classes without one.
 
