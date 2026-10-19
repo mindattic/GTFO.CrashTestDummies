@@ -19,8 +19,8 @@ other players and bots are facing), so nothing ever visibly pops in.
 
 **Population cap, not a one-time budget.** Up to 300 of this mod's dummies may be alive at once
 (combined across all three triggers). It's a ceiling on the current count, not a lifetime total:
-every 30 seconds, any dummy that's been alive for 5+ minutes and is currently out of sight gets
-quietly recycled, freeing its slot - so the population keeps refilling with fresh dummies instead of
+every 30 seconds, any dummy that's been alive for 5+ minutes, is still untouched (unhurt and not
+fighting) and is currently out of sight gets quietly recycled, freeing its slot - so the population keeps refilling with fresh dummies instead of
 permanently maxing out and going quiet for the rest of the run.
 
 ## Infinite ammo and health
@@ -58,6 +58,6 @@ twice.
 | `Ambient.AmbientMaxDistanceMeters` | `100` | Nothing spawns farther than this from you. |
 | `Cleanup.CleanupEnabled` | `true` | Master switch for recycling forgotten dummies. |
 | `Cleanup.CleanupCheckIntervalSeconds` | `30` | How often, in seconds, to check for dummies to recycle (at least 1). |
-| `Cleanup.CleanupAfterSeconds` | `300` | A dummy is only recycled once it's been alive this long *and* is currently out of sight. |
+| `Cleanup.CleanupAfterSeconds` | `300` | A dummy is only recycled once it's been alive this long *and* is currently out of sight. One that's been hurt or is awake and fighting is never recycled (so with `SpawnAsSleepers` off, nothing is). |
 
 Only the host spawns or recycles enemies.

@@ -15,7 +15,8 @@
   get recycled, room opens back up for more - it never permanently maxes out and goes quiet for the
   rest of the expedition.
 - Cleanup: every `CleanupCheckIntervalSeconds` (default 30s), any dummy that's been alive longer than
-  `CleanupAfterSeconds` (default 300s) and is currently out of sight gets quietly despawned (via the
+  `CleanupAfterSeconds` (default 300s), is untouched (unhurt and not in aggressive mode) and is
+  currently out of sight gets quietly despawned (via the
   network replicator, same as a normal enemy removal), freeing its slot in the population cap. A dummy
   is never touched while a player might be looking at it. Toggle with `Cleanup.CleanupEnabled`.
 - Never-seen guarantee, now everywhere: a shared out-of-sight check (`General.OutOfSightHalfAngleDegrees`,

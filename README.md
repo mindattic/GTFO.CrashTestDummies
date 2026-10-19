@@ -91,8 +91,9 @@ drop point):
   moment `EnemyAllocator.Current.SpawnEnemy` returns it. `EnemyCleanup.AliveCount` prunes dead/null
   entries as it counts, and is what `SpawnAround` checks against `MaxTotalEnemies` before spawning.
 - A second infinite coroutine wakes every `CleanupCheckIntervalSeconds`
-  and recycles any tracked dummy that's both older than `CleanupAfterSeconds` and currently hidden
-  (same `Visibility` check) by calling `agent.m_replicator.Despawn()` - the same `SNet_Replicator`
+  and recycles any tracked dummy that's older than `CleanupAfterSeconds`, untouched (`AI.Mode` isn't
+  `Agressive` and `Damage.Health` is still at `HealthMax`, so a hurt or fighting dummy - and, with
+  `SpawnAsSleepers` off, every dummy - stays) and currently hidden (same `Visibility` check) by calling `agent.m_replicator.Despawn()` - the same `SNet_Replicator`
   method the game's own networked spawn/despawn lifecycle uses, so it's removed cleanly for every
   client, not just locally destroyed.
 
