@@ -48,3 +48,4 @@ _Nothing recorded yet._
 | G.CTD-T25 | 2026-10-18 | chore | closed | Shared code republished from GTFO.EZ: SharedOwner.Order now lists GTFO.AbsurdItems | 41368bd |
 | G.CTD-T26 | 2026-10-18 | feature | closed | Master switch: [0. Mod] Enabled as the cfg's first entry; off means the mod loads nothing (user request) | — |
 | G.CTD-T27 | 2026-10-18 | feature | closed | Shared code republished from GTFO.EZ: SharedOwner treats a switched-off GTFO.* mod as not installed, IsActive/TryGetSetting helpers | a00882c |
+| G.CTD-T28 | 2026-10-18 | fix | closed | Leaving a level stops only the top-level coroutines: a scatter yielded as a nested IEnumerator (startup scatter, ambient scatter) runs as its own Unity coroutine and keeps spawning after the level ends | — |
