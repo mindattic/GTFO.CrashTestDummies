@@ -1,4 +1,4 @@
-// Generated from GTFO.EZ src/GTFO.EZ/Shared/SharedOwner.cs (ef7effb) - don't edit here.
+// Generated from GTFO.EZ src/GTFO.EZ/Shared/SharedOwner.cs (948c927) - don't edit here.
 // Change GTFO.EZ's copy and run GTFO.EZ/tools/publish-shared.ps1.
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -25,9 +25,9 @@ internal static class SharedOwner
     private static readonly string[] Order =
     {
         "MindAttic.GTFO.EZ",
-        "MindAttic.GTFO.AbsurdWeapons",
-        "MindAttic.GTFO.AbsurdMoves",
-        "MindAttic.GTFO.AbsurdItems",
+        "MindAttic.GTFO.EZ.AbsurdWeapons",
+        "MindAttic.GTFO.EZ.AbsurdMoves",
+        "MindAttic.GTFO.EZ.AbsurdItems",
         "MindAttic.GTFO.CrashTestDummies",
     };
 
