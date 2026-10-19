@@ -37,8 +37,10 @@ fails to see it. Only the local player has an `FPSCamera`, so on the host every 
 treated as looking every way at once: for them only the linecast can hide a point.
 
 **Startup ordering**: `Post_EnterLevel` runs a `StartupSequence` coroutine that `yield return`s the
-on-drop scatter directly (a nested `IEnumerator` runs to completion before its caller resumes), and
-only *then* starts the ambient and cleanup loops. So the on-drop 100 always gets first claim on the
+on-drop scatter (a nested `IEnumerator` runs to completion before its caller resumes), and only
+*then* starts the ambient and cleanup loops. The scatter runs through `CoroutineSafety.Run`, which
+also guards the routines it yields (the scatter's own `SpawnAround`), so an exception anywhere in it
+is logged and the loops still start. So the on-drop 100 always gets first claim on the
 population cap, regardless of how aggressively `Ambient.*` is tuned.
 
 **On drop** (`SpawnCount`/`SkipFirstMeters`/`MaxDistanceMeters`, default 100 / 10 m / 100 m from the
@@ -120,6 +122,7 @@ TheArchive, and checked against the interop assemblies in the DEV profile.
 src/GTFO.CrashTestDummies/        the plugin project (Harmony patches, game calls)
   Shared/                         generated from GTFO.EZ's src/GTFO.EZ/Shared by its tools/publish-shared.ps1 -
                                   never edit here: the Insert/Delete infinite ammo/health toggles
+                                  and MessageHelper (on-screen messages)
 src/GTFO.CrashTestDummies.Core/   pure spawn logic, no game dependency: spot picking, enemy-type
                                   selection, once-per-level gate; ships alongside the plugin DLL
 tests/                            GTFO.CrashTestDummies.Core.Tests - NUnit, plain `dotnet test`, no game needed
