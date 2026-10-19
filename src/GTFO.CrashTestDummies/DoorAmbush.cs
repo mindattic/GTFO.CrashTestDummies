@@ -2,9 +2,7 @@ using System.Collections.Generic;
 using AIGraph;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using LevelGeneration;
-using Player;
 using SNetwork;
-using UnityEngine;
 
 namespace GTFO.CrashTestDummies;
 
@@ -50,34 +48,26 @@ internal static class DoorAmbush
                 point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value)).WrapToIl2Cpp());
     }
 
-    // A security door's gate connects exactly the two AI-graph nodes on either side of it. Whichever one
-    // is farther from whoever is standing at the door is "the other side".
+    // A security door's gate is built from the area the players come from (m_linksFrom) into the first
+    // area of the zone it unlocks (m_linksTo), and that zone records the gate as its m_sourceGate. So the
+    // far side is the linked area whose zone was entered through this gate - m_linksTo unless the game
+    // says otherwise. Where players happen to stand doesn't decide it: they can be anywhere when an
+    // alarm door opens, including already past it.
     private static AIG_CourseNode? FindFarSideNode(LG_SecurityDoor door)
     {
-        var nodes = door.Gate?.Nodes;
-        if (nodes == null || nodes.Count == 0)
+        var gate = door.Gate;
+        if (gate == null)
             return null;
 
-        var triggerPos = door.transform.position;
-        if (PlayerManager.TryGetCloseEnoughPlayerAgent(triggerPos, 15f, out var nearPlayer) && nearPlayer != null)
-            triggerPos = nearPlayer.transform.position;
+        var to = gate.m_linksTo;
+        var from = gate.m_linksFrom;
+        var farArea = IsEnteredThrough(from, gate) && !IsEnteredThrough(to, gate) ? from : to;
+        return farArea?.m_courseNode;
+    }
 
-        AIG_CourseNode? farthest = null;
-        var farthestDist = -1f;
-        for (var i = 0; i < nodes.Count; i++)
-        {
-            var node = nodes[i]?.TryCast<AIG_CourseNode>();
-            if (node == null)
-                continue;
-
-            var dist = Vector3.Distance(node.Position, triggerPos);
-            if (dist > farthestDist)
-            {
-                farthestDist = dist;
-                farthest = node;
-            }
-        }
-
-        return farthest;
+    private static bool IsEnteredThrough(LG_Area? area, LG_Gate gate)
+    {
+        var sourceGate = area?.m_zone?.m_sourceGate;
+        return sourceGate != null && sourceGate.Pointer == gate.Pointer;
     }
 }

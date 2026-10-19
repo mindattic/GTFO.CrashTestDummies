@@ -58,9 +58,10 @@ drop point):
 - A postfix on `LevelGeneration.LG_SecurityDoor.OnSyncDoorStatusChange` watches every door's networked
   status. `DoorAmbush` remembers each door's previous `eDoorStatus` (keyed by Unity instance ID) so it
   can catch the one transition that matters: `Closed_LockedWithChainedPuzzle_Alarm` (an alarm-scan
-  lock) going to `Open`. On that transition (host only), it reads the door's `Gate.Nodes` - the two
-  AI-graph nodes the door connects - finds whichever player is standing at the door, and picks the
-  node farther from them as "the other side."
+  lock) going to `Open`. On that transition (host only), "the other side" is the room the door leads
+  into: the gate's `m_linksTo` area (the first area of the zone it unlocks; `m_linksFrom` is the side
+  players come from), cross-checked against `LG_Zone.m_sourceGate`, and its `m_courseNode`. Where the
+  players are standing doesn't matter.
 - It then calls the same `EnemySpawner.SpawnAround` routine as the level-start scatter, but centered
   on that far node instead of the drop point, using the `Ambush.*` distance/count settings and the
   shared visibility filter. `MinSpacingMeters`, `EnemyNameFilter` and `SpawnAsSleepers` are shared
