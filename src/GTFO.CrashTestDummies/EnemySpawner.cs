@@ -38,6 +38,28 @@ internal static class EnemySpawner
             yield break;
         }
 
+        yield return SpawnAround(
+            localAgent.transform.position,
+            Settings.SkipFirstMeters.Value,
+            Settings.MaxDistanceMeters.Value,
+            Settings.MinSpacingMeters.Value,
+            Settings.SpawnCount.Value,
+            point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value));
+    }
+
+    /// <summary>
+    /// Host-only: scatters up to <paramref name="count"/> enemies between <paramref name="skipMeters"/> and
+    /// <paramref name="maxMeters"/> from <paramref name="origin"/>, at the level's own enemy spawn spots and
+    /// random walkable points in nearby rooms. Shared by the level-start scatter, the door-triggered ambush,
+    /// and the periodic ambient spawn. <paramref name="isAllowed"/>, if given, drops any candidate spot it
+    /// rejects (e.g. spots currently in a player's view) before spots are picked. <paramref name="count"/>
+    /// is clamped so the number of dummies <see cref="EnemyCleanup"/> is currently tracking as alive never
+    /// exceeds <c>MaxTotalEnemies</c> - a steady-state population cap, not a one-time budget.
+    /// </summary>
+    public static IEnumerator SpawnAround(
+        Vector3 origin, float skipMeters, float maxMeters, float minSpacing, int count,
+        Func<Vector3, bool>? isAllowed = null)
+    {
         var target = GetTargetEnemy();
         if (target == null)
         {
@@ -45,49 +67,62 @@ internal static class EnemySpawner
             yield break;
         }
 
+        var remaining = Settings.MaxTotalEnemies.Value - EnemyCleanup.AliveCount;
+        if (remaining <= 0)
+        {
+            Plugin.Logger.LogInfo(
+                $"CrashTestDummies: MaxTotalEnemies ({Settings.MaxTotalEnemies.Value}) already alive - nothing spawned.");
+            yield break;
+        }
+
+        var cappedCount = Math.Min(count, remaining);
+
         var mode = Settings.SpawnAsSleepers.Value ? AgentMode.Hibernate : AgentMode.Agressive;
-        var origin = localAgent.transform.position;
-        var spots = GatherSpawnSpots(origin);
+        var spots = GatherSpawnSpots(origin, maxMeters);
+        if (isAllowed != null)
+            spots = spots.Where(s => isAllowed(s.Position)).ToList();
         Shuffle(spots);
 
         var picks = SpawnPicker.Pick(
             spots.Select(s => ToNumerics(s.Position)).ToList(),
             ToNumerics(origin),
-            Settings.SkipFirstMeters.Value,
-            Settings.MaxDistanceMeters.Value,
-            Settings.MinSpacingMeters.Value,
-            Settings.SpawnCount.Value);
+            skipMeters,
+            maxMeters,
+            minSpacing,
+            cappedCount);
 
-        if (picks.Count < Settings.SpawnCount.Value)
+        if (picks.Count < cappedCount)
             Plugin.Logger.LogWarning(
-                $"CrashTestDummies: only {picks.Count} of {Settings.SpawnCount.Value} spots fit the distance and spacing rules.");
+                $"CrashTestDummies: only {picks.Count} of {cappedCount} spots fit the distance and spacing rules.");
 
         Plugin.Logger.LogInfo($"CrashTestDummies: spawning {picks.Count}x '{target.name}' ({mode}).");
 
         for (var i = 0; i < picks.Count; i++)
         {
             var spot = spots[picks[i]];
-            EnemyAllocator.Current.SpawnEnemy(target.persistentID, spot.Node, mode, spot.Position, spot.Rotation, null);
+            var agent = EnemyAllocator.Current.SpawnEnemy(target.persistentID, spot.Node, mode, spot.Position, spot.Rotation, null);
+            EnemyCleanup.Track(agent);
 
             if (i % 5 == 4)
                 yield return null;
         }
 
-        Plugin.Logger.LogInfo("CrashTestDummies: done spawning.");
+        Plugin.Logger.LogInfo(
+            $"CrashTestDummies: done spawning ({EnemyCleanup.AliveCount}/{Settings.MaxTotalEnemies.Value} of the population cap alive).");
     }
 
     private readonly record struct SpawnSpot(AIG_CourseNode Node, Vector3 Position, Quaternion Rotation);
 
     // Each nearby room offers its designer-placed enemy spawn points (where the game puts its own sleepers)
     // plus a few random walkable points, so even rooms without authored points get some.
-    private static List<SpawnSpot> GatherSpawnSpots(Vector3 origin)
+    private static List<SpawnSpot> GatherSpawnSpots(Vector3 origin, float maxMeters)
     {
         var spots = new List<SpawnSpot>();
         var nodes = AIG_CourseNode.s_allNodes;
         if (nodes == null)
             return spots;
 
-        var reach = Settings.MaxDistanceMeters.Value + RoomReachMargin;
+        var reach = maxMeters + RoomReachMargin;
         for (var n = 0; n < nodes.Count; n++)
         {
             var node = nodes[n];

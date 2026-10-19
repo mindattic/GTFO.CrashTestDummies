@@ -1,9 +1,11 @@
+using System.Collections;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using GTFO.CrashTestDummies.Core;
 using HarmonyLib;
 using LevelGeneration;
 using Player;
 using SNetwork;
+using UnityEngine;
 
 namespace GTFO.CrashTestDummies;
 
@@ -13,11 +15,34 @@ internal static class LevelPatches
 {
     private static readonly SpawnGate Gate = new();
 
+    // CoroutineHost is a plugin-level component that outlives any single expedition, so these infinite
+    // loops have to be stopped by hand when a new level starts building, or retrying a level would stack
+    // up one running loop per attempt.
+    private static Coroutine? _ambientRoutine;
+    private static Coroutine? _cleanupRoutine;
+
     [HarmonyPatch(typeof(Builder), nameof(Builder.Build))]
     [HarmonyPrefix]
     private static void Pre_Build()
     {
         Gate.Reset();
+        EnemyCleanup.ResetForNewExpedition();
+        StopRoutines();
+    }
+
+    private static void StopRoutines()
+    {
+        if (_ambientRoutine != null)
+        {
+            Plugin.CoroutineHostInstance.StopCoroutine(_ambientRoutine);
+            _ambientRoutine = null;
+        }
+
+        if (_cleanupRoutine != null)
+        {
+            Plugin.CoroutineHostInstance.StopCoroutine(_cleanupRoutine);
+            _cleanupRoutine = null;
+        }
     }
 
     // The player agent already exists in the elevator while the level is still generating, so the
@@ -35,6 +60,26 @@ internal static class LevelPatches
             return;
         }
 
-        Plugin.CoroutineHostInstance.StartCoroutine(EnemySpawner.SpawnRoutine(localAgent).WrapToIl2Cpp());
+        Plugin.CoroutineHostInstance.StartCoroutine(StartupSequence(localAgent).WrapToIl2Cpp());
+    }
+
+    // Runs the initial drop-point scatter to completion before the ambient spawner or cleanup loop get a
+    // chance to touch the population cap, so the initial 100 is never starved by a low AmbientIntervalSeconds.
+    private static IEnumerator StartupSequence(PlayerAgent localAgent)
+    {
+        yield return EnemySpawner.SpawnRoutine(localAgent);
+
+        _ambientRoutine = Plugin.CoroutineHostInstance.StartCoroutine(AmbientSpawner.Routine().WrapToIl2Cpp());
+        _cleanupRoutine = Plugin.CoroutineHostInstance.StartCoroutine(EnemyCleanup.Routine().WrapToIl2Cpp());
+    }
+
+    [HarmonyPatch(typeof(LG_SecurityDoor), nameof(LG_SecurityDoor.OnSyncDoorStatusChange))]
+    [HarmonyPostfix]
+    private static void Post_SecurityDoorStatusChange(LG_SecurityDoor __instance, pDoorState state, bool isRecall)
+    {
+        if (isRecall)
+            return;
+
+        DoorAmbush.OnSecurityDoorStatusChanged(__instance, state.status);
     }
 }

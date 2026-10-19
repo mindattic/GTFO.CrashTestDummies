@@ -1,8 +1,8 @@
 {
   "name": "GtfoCrashTestDummies",
-  "version_number": "1.0.0",
+  "version_number": "3.0.0",
   "website_url": "https://github.com/mindattic/GTFO.CrashTestDummies",
-  "description": "Scatters 100 sleeping Strikers 10-100 m from your drop point at the level's own spawn spots, so you have targets to stealth or shoot while testing other mods.",
+  "description": "Keeps up to 300 sleeping Strikers alive around you at once - on drop, past every alarm door, and via a steady trickle - always out of sight, so you always have targets to stealth or shoot while testing other mods.",
   "dependencies": [
     "BepInEx-BepInExPack_GTFO-3.2.3"
   ]
