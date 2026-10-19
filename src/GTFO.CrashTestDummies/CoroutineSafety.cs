@@ -9,6 +9,8 @@ namespace GTFO.CrashTestDummies;
 /// can't be wrapped in try/catch (C# forbids yield inside a try block with a catch clause), and an
 /// unhandled exception there would otherwise kill the caller too - stopping a longer-lived loop for
 /// the rest of the level, or skipping statements queued to run after it.
+/// A nested routine it yields (the startup scatter yields the spawning itself) is drained the same
+/// way rather than handed to Unity as a child coroutine, which would run outside this guard.
 /// </summary>
 internal static class CoroutineSafety
 {
@@ -29,7 +31,7 @@ internal static class CoroutineSafety
                 yield break;
             }
 
-            yield return current;
+            yield return current is IEnumerator nested ? Run(nested, label) : current;
         }
     }
 }

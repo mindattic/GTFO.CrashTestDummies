@@ -53,3 +53,4 @@ _Nothing recorded yet._
 | G.CTD-T30 | 2026-10-18 | fix | closed | Shared code from GTFO.EZ (G.EZ-T72/T75): warden message never cuts the game's own short; infinite-health check can't throw | — |
 | G.CTD-T31 | 2026-10-18 | chore | closed | Shared code republished from GTFO.EZ: SharedOwner.Order uses the renamed GTFO.EZ.Absurd* GUIDs | 7eec910 |
 | G.CTD-T32 | 2026-10-18 | fix | closed | Shared code from GTFO.EZ (G.EZ-T78/T79): WardenMessage became MessageHelper; Insert/Delete announce in the event log | — |
+| G.CTD-T33 | 2026-10-19 | fix | closed | CoroutineSafety.Run didn't guard nested routines: the startup scatter's SpawnAround ran as an unguarded Unity child coroutine, so its exceptions escaped the safety wrapper (fixed in working tree, uncommitted) | CoroutineSafety.Run nested guard; CrashTestDummies.Core.Tests 27/27 |
