@@ -26,13 +26,17 @@ internal static class AmbientSpawner
                 continue;
 
             var count = UnityEngine.Random.Range(Settings.AmbientCountMin.Value, Settings.AmbientCountMax.Value + 1);
-            yield return EnemySpawner.SpawnAround(
-                localAgent.transform.position,
-                Settings.AmbientSkipFirstMeters.Value,
-                Settings.AmbientMaxDistanceMeters.Value,
-                Settings.MinSpacingMeters.Value,
-                count,
-                point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value));
+            // Run through the safety wrapper: an exception from one ambient scatter must not end this
+            // while(true) loop and silently stop ambient spawning for the rest of the level.
+            yield return CoroutineSafety.Run(
+                EnemySpawner.SpawnAround(
+                    localAgent.transform.position,
+                    Settings.AmbientSkipFirstMeters.Value,
+                    Settings.AmbientMaxDistanceMeters.Value,
+                    Settings.MinSpacingMeters.Value,
+                    count,
+                    point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value)),
+                "ambient spawn");
         }
     }
 }

@@ -67,7 +67,9 @@ internal static class LevelPatches
     // chance to touch the population cap, so the initial 100 is never starved by a low AmbientIntervalSeconds.
     private static IEnumerator StartupSequence(PlayerAgent localAgent)
     {
-        yield return EnemySpawner.SpawnRoutine(localAgent);
+        // Safety-wrapped: an exception thrown mid-scatter must not skip the statements below it and
+        // leave ambient spawning and cleanup never started for the whole level.
+        yield return CoroutineSafety.Run(EnemySpawner.SpawnRoutine(localAgent), "startup scatter");
 
         _ambientRoutine = Plugin.CoroutineHostInstance.StartCoroutine(AmbientSpawner.Routine().WrapToIl2Cpp());
         _cleanupRoutine = Plugin.CoroutineHostInstance.StartCoroutine(EnemyCleanup.Routine().WrapToIl2Cpp());
