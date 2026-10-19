@@ -30,6 +30,17 @@ internal static class LevelPatches
         StopRoutines();
     }
 
+    // The ambient and cleanup loops otherwise only stop at the next Builder.Build, so without this
+    // they keep running - and the ambient loop can keep spawning - all through the success/fail
+    // end screen, right up until the next expedition actually starts generating.
+    [HarmonyPatch(typeof(GS_ExpeditionSuccess), nameof(GS_ExpeditionSuccess.Enter))]
+    [HarmonyPostfix]
+    private static void Post_ExpeditionSuccess() => StopRoutines();
+
+    [HarmonyPatch(typeof(GS_ExpeditionFail), nameof(GS_ExpeditionFail.Enter))]
+    [HarmonyPostfix]
+    private static void Post_ExpeditionFail() => StopRoutines();
+
     private static void StopRoutines()
     {
         if (_ambientRoutine != null)
