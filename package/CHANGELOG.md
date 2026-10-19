@@ -27,7 +27,8 @@
 - The level-start scatter is guaranteed to run, and claim its share of the population cap, before the
   ambient scatter or cleanup loop start - so the initial 100 is never crowded out regardless of how
   aggressively `Ambient.*` is tuned.
-- Nothing outlives its level: the ambient scatter, cleanup and any door ambush still spawning all stop
+- Nothing outlives its level: the ambient scatter, cleanup and any scatter still spawning (level-start,
+  ambient or door ambush) all stop
   the moment you leave the level (success, fail, abort to lobby or a checkpoint reload), and the
   ambient scatter and cleanup start again when you're back in after a checkpoint.
 

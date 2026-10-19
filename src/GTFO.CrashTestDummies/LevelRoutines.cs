@@ -1,7 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
-using UnityEngine;
 
 namespace GTFO.CrashTestDummies;
 
@@ -14,29 +12,23 @@ namespace GTFO.CrashTestDummies;
 /// </summary>
 internal static class LevelRoutines
 {
-    private static readonly List<Coroutine> Running = new();
-
     /// <summary>Changes every time the level's routines are stopped.</summary>
     public static int Run { get; private set; }
 
     public static bool IsCurrent(int run) => run == Run;
 
-    public static void Start(IEnumerator routine)
-    {
-        var coroutine = Plugin.CoroutineHostInstance.StartCoroutine(routine.WrapToIl2Cpp());
-        if (coroutine != null)
-            Running.Add(coroutine);
-    }
+    public static void Start(IEnumerator routine) =>
+        Plugin.CoroutineHostInstance.StartCoroutine(routine.WrapToIl2Cpp());
 
     public static void StopAll()
     {
         Run++;
-        foreach (var coroutine in Running)
-        {
-            if (coroutine != null)
-                Plugin.CoroutineHostInstance.StopCoroutine(coroutine);
-        }
 
-        Running.Clear();
+        // StopAllCoroutines, not StopCoroutine on each started handle: a routine that yields another
+        // IEnumerator (the startup sequence's scatter, each ambient scatter) hands it to Unity as a
+        // separate child coroutine, and stopping the parent leaves that child running - it would keep
+        // spawning into a level that's over. Every child runs on CoroutineHost too, and nothing else
+        // uses CoroutineHost, so stopping all of its coroutines stops exactly this level's routines.
+        Plugin.CoroutineHostInstance.StopAllCoroutines();
     }
 }

@@ -100,7 +100,10 @@ drop point):
 single expedition, so every coroutine started for a level - the startup scatter, the ambient and cleanup
 loops, and each door ambush - is started through `LevelRoutines` and stopped together when the level
 ends: a postfix on `GS_InLevel.Exit` (success, fail, abort to lobby, checkpoint), the success/fail
-screens' `Enter`, and `Pre_Build`. Each stop also bumps `LevelRoutines.Run`; the loops and
+screens' `Enter`, and `Pre_Build`. The stop is `CoroutineHost.StopAllCoroutines()`, not
+`StopCoroutine` on each started handle: a routine that `yield return`s another `IEnumerator` (the
+startup scatter, each ambient scatter) hands it to Unity as a separate child coroutine, which stopping
+the parent leaves running; nothing but `LevelRoutines` uses `CoroutineHost`. Each stop also bumps `LevelRoutines.Run`; the loops and
 `StartupSequence` check the value they started with after every wait, so nothing outlives its level.
 Re-entering `InLevel` in the same expedition (a checkpoint reload) restarts the ambient and cleanup
 loops, but not the once-per-expedition drop-point scatter.
