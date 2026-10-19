@@ -78,7 +78,17 @@ internal static class EnemySpawner
         var cappedCount = Math.Min(count, remaining);
 
         var mode = Settings.SpawnAsSleepers.Value ? AgentMode.Hibernate : AgentMode.Agressive;
-        var spots = GatherSpawnSpots(origin, maxMeters);
+        // Drop spots outside the distance band before the (raycasting, per-player) isAllowed check, so
+        // it only runs on spots SpawnPicker could actually use.
+        var minSqr = skipMeters > 0f ? skipMeters * skipMeters : 0f;
+        var maxSqr = maxMeters * maxMeters;
+        var spots = GatherSpawnSpots(origin, maxMeters)
+            .Where(s =>
+            {
+                var sqr = (s.Position - origin).sqrMagnitude;
+                return sqr >= minSqr && sqr <= maxSqr;
+            })
+            .ToList();
         if (isAllowed != null)
             spots = spots.Where(s => isAllowed(s.Position)).ToList();
         Shuffle(spots);

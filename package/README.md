@@ -52,12 +52,12 @@ twice.
 | `Ambush.AmbushSkipFirstMeters` | `10` | Nothing spawns closer than this to the far side of the doorway. |
 | `Ambush.AmbushMaxDistanceMeters` | `100` | Nothing spawns farther than this from the far side of the doorway. |
 | `Ambient.AmbientSpawnEnabled` | `true` | Master switch for the ambient trickle. |
-| `Ambient.AmbientIntervalSeconds` | `60` | How often, in seconds, the ambient trickle runs. |
+| `Ambient.AmbientIntervalSeconds` | `60` | How often, in seconds, the ambient trickle runs (at least 1). |
 | `Ambient.AmbientCountMin` / `AmbientCountMax` | `50` / `100` | A random count in this range is scattered each time the ambient trickle runs. |
 | `Ambient.AmbientSkipFirstMeters` | `10` | Nothing spawns closer than this to you. |
 | `Ambient.AmbientMaxDistanceMeters` | `100` | Nothing spawns farther than this from you. |
 | `Cleanup.CleanupEnabled` | `true` | Master switch for recycling forgotten dummies. |
-| `Cleanup.CleanupCheckIntervalSeconds` | `30` | How often, in seconds, to check for dummies to recycle. |
+| `Cleanup.CleanupCheckIntervalSeconds` | `30` | How often, in seconds, to check for dummies to recycle (at least 1). |
 | `Cleanup.CleanupAfterSeconds` | `300` | A dummy is only recycled once it's been alive this long *and* is currently out of sight. |
 
 Only the host spawns or recycles enemies.

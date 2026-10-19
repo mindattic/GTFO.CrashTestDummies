@@ -15,6 +15,8 @@ internal static class EnemyCleanup
 {
     private readonly record struct TrackedEnemy(EnemyAgent Agent, float SpawnTime);
 
+    private const float MinIntervalSeconds = 1f;
+
     private static readonly List<TrackedEnemy> Tracked = new();
 
     public static void Track(EnemyAgent? agent)
@@ -47,7 +49,8 @@ internal static class EnemyCleanup
     {
         while (true)
         {
-            yield return new WaitForSeconds(Settings.CleanupCheckIntervalSeconds.Value);
+            // A zero or negative interval would sweep every tracked dummy every frame.
+            yield return new WaitForSeconds(Math.Max(MinIntervalSeconds, Settings.CleanupCheckIntervalSeconds.Value));
 
             if (!Settings.ModEnabled.Value || !Settings.CleanupEnabled.Value || !SNet.IsMaster)
                 continue;

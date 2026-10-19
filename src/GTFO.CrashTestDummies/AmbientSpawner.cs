@@ -13,11 +13,14 @@ namespace GTFO.CrashTestDummies;
 /// </summary>
 internal static class AmbientSpawner
 {
+    private const float MinIntervalSeconds = 1f;
+
     public static IEnumerator Routine()
     {
         while (true)
         {
-            yield return new WaitForSeconds(Settings.AmbientIntervalSeconds.Value);
+            // A zero or negative interval would run a full scatter every frame.
+            yield return new WaitForSeconds(Math.Max(MinIntervalSeconds, Settings.AmbientIntervalSeconds.Value));
 
             if (!Settings.ModEnabled.Value || !Settings.AmbientSpawnEnabled.Value || !SNet.IsMaster)
                 continue;

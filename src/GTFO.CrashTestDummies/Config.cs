@@ -104,7 +104,7 @@ internal static class Settings
 
         AmbientIntervalSeconds = config.Bind(
             "Ambient", "AmbientIntervalSeconds", 60f,
-            "How often, in seconds, to run the ambient scatter.");
+            "How often, in seconds, to run the ambient scatter (at least 1).");
 
         AmbientCountMin = config.Bind(
             "Ambient", "AmbientCountMin", 50,
@@ -130,7 +130,7 @@ internal static class Settings
 
         CleanupCheckIntervalSeconds = config.Bind(
             "Cleanup", "CleanupCheckIntervalSeconds", 30f,
-            "How often, in seconds, to check for dummies to recycle.");
+            "How often, in seconds, to check for dummies to recycle (at least 1).");
 
         CleanupAfterSeconds = config.Bind(
             "Cleanup", "CleanupAfterSeconds", 300f,
