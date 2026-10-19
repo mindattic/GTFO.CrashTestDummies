@@ -52,3 +52,4 @@ _Nothing recorded yet._
 | G.CTD-T29 | 2026-10-18 | fix | closed | Docs say cleanup recycles any dummy alive 5+ min and out of sight; the code also skips any that's hurt or aggressive (so with SpawnAsSleepers off none are recycled) | — |
 | G.CTD-T30 | 2026-10-18 | fix | closed | Shared code from GTFO.EZ (G.EZ-T72/T75): warden message never cuts the game's own short; infinite-health check can't throw | — |
 | G.CTD-T31 | 2026-10-18 | chore | closed | Shared code republished from GTFO.EZ: SharedOwner.Order uses the renamed GTFO.EZ.Absurd* GUIDs | 7eec910 |
+| G.CTD-T32 | 2026-10-18 | fix | closed | Shared code from GTFO.EZ (G.EZ-T78/T79): WardenMessage became MessageHelper; Insert/Delete announce in the event log | — |
