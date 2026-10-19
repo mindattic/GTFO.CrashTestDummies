@@ -99,6 +99,17 @@ internal static class EnemySpawner
 
         for (var i = 0; i < picks.Count; i++)
         {
+            // Re-check the live count, not just the snapshot taken before this loop started: a door
+            // ambush and an ambient scatter both pass that snapshot check before either has spawned
+            // anything, and this loop yields every 5 spawns, so only a check against the current
+            // total - taken again on every iteration - keeps two overlapping spawns under the cap.
+            if (EnemyCleanup.AliveCount >= Settings.MaxTotalEnemies.Value)
+            {
+                Plugin.Logger.LogInfo(
+                    $"CrashTestDummies: MaxTotalEnemies ({Settings.MaxTotalEnemies.Value}) reached mid-spawn - stopping early.");
+                break;
+            }
+
             var spot = spots[picks[i]];
             var agent = EnemyAllocator.Current.SpawnEnemy(target.persistentID, spot.Node, mode, spot.Position, spot.Rotation, null);
             EnemyCleanup.Track(agent);
