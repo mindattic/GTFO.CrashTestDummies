@@ -15,10 +15,9 @@ All three triggers share the same core routine (`EnemySpawner.SpawnAround`): gat
 from every room (`AIG_CourseNode.s_allNodes`) near an origin point, optionally drop any that fail an
 `isAllowed` predicate, shuffle what's left, and keep up to `count` that are between `skipMeters` and
 `maxMeters` of that origin and at least `MinSpacingMeters` apart. What differs between triggers is the
-origin, the distance/count settings, and (for door ambush and ambient) that `isAllowed` is the shared
-visibility check. `count` is also clamped so `EnemyCleanup.AliveCount` (how many of this mod's
-dummies are currently alive) never exceeds `MaxTotalEnemies` - a steady-state population cap, not a
-one-time budget.
+origin and the distance/count settings; all three pass the shared visibility check as `isAllowed`.
+`count` is also clamped so `EnemyCleanup.AliveCount` (how many of this mod's dummies are currently
+alive) never exceeds `MaxTotalEnemies` - a steady-state population cap, not a one-time budget.
 
 **Out of sight, for every trigger and for cleanup** (`Visibility.cs`, `OutOfSightHalfAngleDegrees`,
 default 70°): a candidate point is hidden from a player if it's outside this many degrees of the
@@ -56,12 +55,13 @@ drop point):
 20 / 10 m / 100 m from the far side of *that* door, wherever it is in the level):
 
 - A postfix on `LevelGeneration.LG_SecurityDoor.OnSyncDoorStatusChange` watches every door's networked
-  status. `DoorAmbush` remembers each door's previous `eDoorStatus` (keyed by Unity instance ID) so it
-  can catch the one transition that matters: `Closed_LockedWithChainedPuzzle_Alarm` (an alarm-scan
-  lock) going to `Open`. On that transition (host only), "the other side" is the room the door leads
-  into: the gate's `m_linksTo` area (the first area of the zone it unlocks; `m_linksFrom` is the side
-  players come from), cross-checked against `LG_Zone.m_sourceGate`, and its `m_courseNode`. Where the
-  players are standing doesn't matter.
+  status. `DoorAmbush` doesn't keep each door's last `eDoorStatus` (an alarm door passes through
+  puzzle-activated, unlocked and opening on its way to open): it only remembers, by Unity instance ID,
+  which doors it has seen `Closed_LockedWithChainedPuzzle_Alarm` (an alarm-scan lock). When one of
+  those reaches `Open` it's forgotten, so each door ambushes once. On that open (host only), "the
+  other side" is the room the door leads into: the gate's `m_linksTo` area (the first area of the
+  zone it unlocks; `m_linksFrom` is the side players come from), cross-checked against
+  `LG_Zone.m_sourceGate`, and its `m_courseNode`. Where the players are standing doesn't matter.
 - It then calls the same `EnemySpawner.SpawnAround` routine as the level-start scatter, but centered
   on that far node instead of the drop point, using the `Ambush.*` distance/count settings and the
   shared visibility filter. `MinSpacingMeters`, `EnemyNameFilter` and `SpawnAsSleepers` are shared
