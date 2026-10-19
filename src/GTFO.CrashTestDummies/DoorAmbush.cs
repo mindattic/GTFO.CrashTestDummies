@@ -19,7 +19,7 @@ internal static class DoorAmbush
 
     public static void OnSecurityDoorStatusChanged(LG_SecurityDoor? door, eDoorStatus status)
     {
-        if (door == null || !Settings.ModEnabled.Value || !Settings.AmbushOnAlarmDoors.Value || !SNet.IsMaster)
+        if (door == null || !Settings.AmbushOnAlarmDoors.Value || !SNet.IsMaster)
             return;
 
         var key = door.GetInstanceID();

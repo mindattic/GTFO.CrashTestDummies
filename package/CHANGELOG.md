@@ -2,6 +2,10 @@
 
 ## v3
 
+- Master switch: `0. Mod.Enabled` (default `true`) is now the config file's first entry, and turning
+  it off turns the whole mod off - nothing is patched, no dummies, no Insert/Delete. It replaces
+  `General.Enabled`, which only stopped spawning; if you'd set that to `false`, the new switch starts
+  `false` too and the old key is removed.
 - Ambient scatter: every `AmbientIntervalSeconds` (default 60s), the host scatters a random
   `AmbientCountMin`-`AmbientCountMax` (default 50-100) more dummies between `AmbientSkipFirstMeters`
   and `AmbientMaxDistanceMeters` (default 10-100 m) of wherever the local player currently is. Toggle

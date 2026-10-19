@@ -20,6 +20,12 @@ public class Plugin : BasePlugin
     {
         Logger = Log;
 
+        if (!Settings.BindMasterSwitch(Config))
+        {
+            Logger.LogInfo($"{NAME} is switched off in its config ([0. Mod] Enabled) - not loading.");
+            return;
+        }
+
         Settings.Bind(Config);
 
         CoroutineHostInstance = AddComponent<CoroutineHost>();

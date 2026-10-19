@@ -56,7 +56,7 @@ internal static class EnemyCleanup
             if (!LevelRoutines.IsCurrent(run))
                 yield break;
 
-            if (!Settings.ModEnabled.Value || !Settings.CleanupEnabled.Value || !SNet.IsMaster)
+            if (!Settings.CleanupEnabled.Value || !SNet.IsMaster)
                 continue;
 
             var now = Time.time;

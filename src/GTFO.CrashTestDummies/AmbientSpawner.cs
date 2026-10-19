@@ -26,7 +26,7 @@ internal static class AmbientSpawner
             if (!LevelRoutines.IsCurrent(run))
                 yield break;
 
-            if (!Settings.ModEnabled.Value || !Settings.AmbientSpawnEnabled.Value || !SNet.IsMaster)
+            if (!Settings.AmbientSpawnEnabled.Value || !SNet.IsMaster)
                 continue;
 
             if (!PlayerManager.TryGetLocalPlayerAgent(out var localAgent) || localAgent == null)

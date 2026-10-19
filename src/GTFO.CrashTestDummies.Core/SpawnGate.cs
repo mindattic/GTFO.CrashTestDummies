@@ -9,12 +9,12 @@ public sealed class SpawnGate
     public void Reset() => _consumed = false;
 
     /// <summary>
-    /// True exactly once per level when the mod is enabled and this client is the host. A call that's
-    /// refused because the mod is off or this isn't the host doesn't use up the level's spawn.
+    /// True exactly once per level when this client is the host. A call that's refused because this
+    /// isn't the host doesn't use up the level's spawn.
     /// </summary>
-    public bool TryBegin(bool modEnabled, bool isHost)
+    public bool TryBegin(bool isHost)
     {
-        if (!modEnabled || !isHost || _consumed)
+        if (!isHost || _consumed)
             return false;
 
         _consumed = true;

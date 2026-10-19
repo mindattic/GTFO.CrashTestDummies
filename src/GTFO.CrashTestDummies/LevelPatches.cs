@@ -58,11 +58,11 @@ internal static class LevelPatches
     [HarmonyPostfix]
     private static void Post_EnterLevel()
     {
-        if (!Gate.TryBegin(Settings.ModEnabled.Value, SNet.IsMaster))
+        if (!Gate.TryBegin(SNet.IsMaster))
         {
             // Back in the level after leaving it (a checkpoint reload): the loops were stopped on the
             // way out, so start them again. The drop-point scatter stays once per expedition.
-            if (_expeditionStarted && Settings.ModEnabled.Value && SNet.IsMaster)
+            if (_expeditionStarted && SNet.IsMaster)
                 StartLoops();
             return;
         }

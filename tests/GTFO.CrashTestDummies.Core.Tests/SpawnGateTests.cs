@@ -10,31 +10,25 @@ public class SpawnGateTests
     {
         var gate = new SpawnGate();
 
-        Assert.That(gate.TryBegin(modEnabled: true, isHost: true), Is.True);
-        Assert.That(gate.TryBegin(modEnabled: true, isHost: true), Is.False);
+        Assert.That(gate.TryBegin(isHost: true), Is.True);
+        Assert.That(gate.TryBegin(isHost: true), Is.False);
     }
 
     [Test]
     public void ReopensAfterANewLevelStarts()
     {
         var gate = new SpawnGate();
-        gate.TryBegin(modEnabled: true, isHost: true);
+        gate.TryBegin(isHost: true);
 
         gate.Reset();
 
-        Assert.That(gate.TryBegin(modEnabled: true, isHost: true), Is.True);
-    }
-
-    [Test]
-    public void StaysShutWhenTheModIsDisabled()
-    {
-        Assert.That(new SpawnGate().TryBegin(modEnabled: false, isHost: true), Is.False);
+        Assert.That(gate.TryBegin(isHost: true), Is.True);
     }
 
     [Test]
     public void StaysShutForClients()
     {
-        Assert.That(new SpawnGate().TryBegin(modEnabled: true, isHost: false), Is.False);
+        Assert.That(new SpawnGate().TryBegin(isHost: false), Is.False);
     }
 
     [Test]
@@ -42,10 +36,9 @@ public class SpawnGateTests
     {
         var gate = new SpawnGate();
 
-        gate.TryBegin(modEnabled: false, isHost: true);
-        gate.TryBegin(modEnabled: true, isHost: false);
+        gate.TryBegin(isHost: false);
 
-        Assert.That(gate.TryBegin(modEnabled: true, isHost: true), Is.True);
+        Assert.That(gate.TryBegin(isHost: true), Is.True);
     }
 
     [Test]
@@ -55,6 +48,6 @@ public class SpawnGateTests
 
         gate.Reset();
 
-        Assert.That(gate.TryBegin(modEnabled: true, isHost: true), Is.True);
+        Assert.That(gate.TryBegin(isHost: true), Is.True);
     }
 }

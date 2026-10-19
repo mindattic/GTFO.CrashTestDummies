@@ -37,7 +37,7 @@ twice.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `General.Enabled` | `true` | Master on/off switch. |
+| `0. Mod.Enabled` | `true` | Turn the whole mod on or off. When false, the mod loads nothing: no patches, no hotkeys, no dummies. It's the file's first entry, so the mod can be switched off where a mod manager profile doesn't list it. Takes effect on restart. Replaces the old `General.Enabled`; a saved `false` there carries over. |
 | `General.MaxTotalEnemies` | `300` | Population cap: how many of this mod's dummies may be alive at once, combined across all triggers. |
 | `General.OutOfSightHalfAngleDegrees` | `70` | Used by every trigger and by cleanup: a spot is hidden from the host if it's outside this many degrees of the centre of their view, or something blocks line of sight to it. Other players and bots count as looking every way, so only a blocked line of sight hides a spot from them. |
 | `Spawning.SpawnCount` | `100` | How many enemies the on-drop scatter spawns. |

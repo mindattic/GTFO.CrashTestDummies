@@ -4,7 +4,6 @@ namespace GTFO.CrashTestDummies;
 
 internal static class Settings
 {
-    public static ConfigEntry<bool> ModEnabled = null!;
     public static ConfigEntry<int> MaxTotalEnemies = null!;
     public static ConfigEntry<float> OutOfSightHalfAngleDegrees = null!;
     public static ConfigEntry<int> SpawnCount = null!;
@@ -28,12 +27,31 @@ internal static class Settings
     public static ConfigEntry<float> CleanupCheckIntervalSeconds = null!;
     public static ConfigEntry<float> CleanupAfterSeconds = null!;
 
+    /// <summary>
+    /// Binds the master switch, the cfg's first entry ("0. Mod" sorts ahead of every other section),
+    /// so the mod can be turned off from its .cfg where a mod manager profile doesn't list it. Bound
+    /// before anything else; when it's off the plugin loads nothing.
+    /// </summary>
+    public static bool BindMasterSwitch(ConfigFile config)
+    {
+        var enabled = config.Bind(
+            "0. Mod", "Enabled", true,
+            "Turn the whole mod on or off. When false, the mod loads nothing: no patches, no hotkeys, no dummies.");
+
+        // v3 had a [General] Enabled that only stopped spawning; it's replaced by this one. A saved
+        // false carries over, then the old key leaves the file. (Binding it picks up the saved value;
+        // with none in the file it's the default true and changes nothing.)
+        var legacy = new ConfigDefinition("General", "Enabled");
+        if (!config.Bind(legacy, true).Value)
+            enabled.Value = false;
+        config.Remove(legacy);
+        config.Save();
+
+        return enabled.Value;
+    }
+
     public static void Bind(ConfigFile config)
     {
-        ModEnabled = config.Bind(
-            "General", "Enabled", true,
-            "Master switch. Disable to stop dummies from spawning without uninstalling the mod.");
-
         MaxTotalEnemies = config.Bind(
             "General", "MaxTotalEnemies", 300,
             "Population cap: how many of this mod's dummies may be alive at once, combined across the " +

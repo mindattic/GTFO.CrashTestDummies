@@ -9,6 +9,15 @@ a recurring trickle near wherever you currently are. Every trigger, plus the cle
 forgotten dummies, is gated by the same "is any player currently looking at this spot" check, so
 nothing ever visibly pops in or out.
 
+## Config
+
+`BepInEx/config/MindAttic.GTFO.CrashTestDummies.cfg`; every setting, its default and what it does is
+in [`package/README.md`](package/README.md#config). Its first entry is the master switch:
+
+| Setting | Default | What it does |
+|---|---|---|
+| `[0. Mod] Enabled` | `true` | Turn the whole mod on or off. When false, `Plugin.Load` logs one line and returns before binding anything else, adding the coroutine host or patching, so nothing of the mod runs (Insert/Delete included). `0. Mod` sorts ahead of every other section, so it's the file's first entry. It replaces the old `[General] Enabled`, which only gated spawning: `Settings.BindMasterSwitch` carries a saved `false` over and removes the old key. |
+
 ## How it works
 
 All three triggers share the same core routine (`EnemySpawner.SpawnAround`): gather candidate spots
