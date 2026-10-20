@@ -67,13 +67,18 @@ internal static class LevelPatches
             return;
         }
 
+        // The gate is spent either way, so mark the expedition started before the agent check: bailing
+        // out first would leave the ambient and cleanup loops unstarted for the whole expedition, a
+        // checkpoint reload included (that path only restarts them for a started expedition).
+        _expeditionStarted = true;
+
         if (!PlayerManager.TryGetLocalPlayerAgent(out var localAgent) || localAgent == null)
         {
-            Plugin.Logger.LogWarning("CrashTestDummies: entered the level without a local player agent - nothing spawned.");
+            Plugin.Logger.LogWarning("CrashTestDummies: entered the level without a local player agent - skipping the drop-point scatter.");
+            StartLoops();
             return;
         }
 
-        _expeditionStarted = true;
         LevelRoutines.Start(StartupSequence(localAgent, LevelRoutines.Run));
     }
 
