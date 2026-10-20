@@ -2,7 +2,7 @@
 
 A BepInEx mod for GTFO that keeps up to 300 sleeping Strikers alive around you, always spawned and recycled out of sight, so you always have targets to sneak up on or shoot while testing other mods.
 
-[![C#](https://img.shields.io/badge/language-C%23-239120)](src/GTFO.CrashTestDummies) [![.NET 6](https://img.shields.io/badge/.NET-6.0-512BD4)](src/GTFO.CrashTestDummies/GTFO.CrashTestDummies.csproj) [![BepInEx IL2CPP](https://img.shields.io/badge/BepInEx-IL2CPP-orange)](package/manifest.json) [![Version 3](https://img.shields.io/badge/version-3.0.0-blue)](package/CHANGELOG.md) [![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](#license)
+[![C#](https://img.shields.io/badge/language-C%23-239120)](src/GTFO.CrashTestDummies) [![.NET 6](https://img.shields.io/badge/.NET-6.0-512BD4)](src/GTFO.CrashTestDummies/GTFO.CrashTestDummies.csproj) [![BepInEx IL2CPP](https://img.shields.io/badge/BepInEx-IL2CPP-orange)](package/manifest.json) [![Version 3](https://img.shields.io/badge/version-4.0.0-blue)](package/CHANGELOG.md) [![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](#license)
 
 ```text
             drop point                 alarm door opens               every 60 s
@@ -18,7 +18,7 @@ A BepInEx mod for GTFO that keeps up to 300 sleeping Strikers alive around you, 
 ```
 
 Try it: run `build.ps1` to build into a Thunderstore Mod Manager profile and package
-`dist/GTFO.CrashTestDummies-3.0.0.zip` (Thunderstore package name `GtfoCrashTestDummies`).
+`dist/GTFO.CrashTestDummies-4.0.0.zip` (Thunderstore package name `GtfoCrashTestDummies`).
 
 ## Why
 
@@ -62,7 +62,7 @@ git submodule update --init
 ```
 
 Launch any rundown from that profile. `BepInEx/LogOutput.log` should show
-`GTFO.CrashTestDummies v3.0.0 loaded`, then on landing the chosen dummy type and
+`GTFO.CrashTestDummies v4.0.0 loaded`, then on landing the chosen dummy type and
 `spawning 100x 'Striker_Hibernate' (Hibernate).`
 
 ## Configuration
@@ -202,7 +202,7 @@ untested by `dotnet test` and only verifiable in-game.
 
 The Harmony patches and game calls in `src/GTFO.CrashTestDummies/` only run inside the game, so
 check those in-game after `build.ps1`: launch any rundown in the profile. `LogOutput.log` should show
-`GTFO.CrashTestDummies v3.0.0 loaded`, then on landing the chosen dummy type and
+`GTFO.CrashTestDummies v4.0.0 loaded`, then on landing the chosen dummy type and
 `spawning 100x 'Striker_Hibernate' (Hibernate).` Open an alarm-locked security door and it should log
 `alarm door opened - ambushing the far side near ...`, then `spawning 20x 'Striker_Hibernate' (Hibernate).`
 About a minute later it should log another `spawning Nx 'Striker_Hibernate' (Hibernate).` (N between 50
@@ -212,7 +212,7 @@ dummy should ever appear to pop in or out while you're looking at the spot it oc
 
 ## Versioning
 
-Major-only bumps (v1, v2, ...), written as `1.0.0` in `manifest.json`. The current version is v3; what
+Major-only bumps (v1, v2, ...), written as `1.0.0` in `manifest.json`. The current version is v4; what
 changed in each is in [package/CHANGELOG.md](package/CHANGELOG.md).
 
 ## Publishing to Thunderstore

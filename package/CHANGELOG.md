@@ -1,5 +1,11 @@
 # Changelog
 
+## v4
+
+- **Bug fix:** a host who entered a level without a local player got no ambient scatter and no
+  cleanup for that whole expedition, not even after a checkpoint reload. Now only the drop-point
+  scatter is skipped and both loops still start.
+
 ## v3
 
 - Master switch: `0. Mod.Enabled` (default `true`) is now the config file's first entry, and turning

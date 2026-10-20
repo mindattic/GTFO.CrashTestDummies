@@ -1,6 +1,6 @@
 {
   "name": "GtfoCrashTestDummies",
-  "version_number": "3.0.0",
+  "version_number": "4.0.0",
   "website_url": "https://github.com/mindattic/GTFO.CrashTestDummies",
   "description": "Keeps up to 300 sleeping Strikers alive around you at once - on drop, past every alarm door, and via a steady trickle - always out of sight, so you always have targets to stealth or shoot while testing other mods.",
   "dependencies": [
