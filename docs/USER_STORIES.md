@@ -57,3 +57,4 @@ _Nothing recorded yet._
 | G.CTD-T34 | 2026-10-19 | docs | closed | README review: startup scatter's CoroutineSafety guard and the Shared folder's MessageHelper (user request) | README.md |
 | G.CTD-T35 | 2026-10-19 | chore | open | Convert tracked source files to LF line endings via .gitattributes, per HOUSE-LAW-13 (low priority) | — |
 | G.CTD-T36 | 2026-10-19 | fix | closed | A host that enters the level without a local player agent spent the once-per-expedition gate and returned before marking the expedition started, so the ambient and cleanup loops never ran that expedition, not even after a checkpoint reload; now the loops start and only the drop-point scatter is skipped | 47588d8 |
+| G.CTD-T37 | 2026-10-20 | chore | closed | Bump GTFO.CrashTestDummies to v4.0.0 for release: changelog for the no-local-player loops fix (user request) | 9d3aad3 |
