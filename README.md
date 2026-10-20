@@ -120,8 +120,8 @@ TheArchive, and checked against the interop assemblies in the DEV profile.
 
 ```
 src/GTFO.CrashTestDummies/        the plugin project (Harmony patches, game calls)
-  Shared/                         generated from GTFO.EZ's src/GTFO.EZ/Shared by its tools/publish-shared.ps1 -
-                                  never edit here: the Insert/Delete infinite ammo/health toggles
+  Shared/                         linked from external/GTFO.EZ.Shared (a git submodule; change it
+                                  there): SharedOwner, the Insert/Delete infinite ammo/health toggles
                                   and MessageHelper (on-screen messages)
 src/GTFO.CrashTestDummies.Core/   pure spawn logic, no game dependency: spot picking, enemy-type
                                   selection, once-per-level gate; ships alongside the plugin DLL
