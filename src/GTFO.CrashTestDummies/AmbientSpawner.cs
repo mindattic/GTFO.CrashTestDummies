@@ -1,5 +1,4 @@
 using System.Collections;
-using BepInEx.Unity.IL2CPP.Utils.Collections;
 using Player;
 using SNetwork;
 using UnityEngine;
@@ -41,8 +40,7 @@ internal static class AmbientSpawner
                     Settings.AmbientSkipFirstMeters.Value,
                     Settings.AmbientMaxDistanceMeters.Value,
                     Settings.MinSpacingMeters.Value,
-                    count,
-                    point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value)),
+                    count),
                 "ambient spawn");
         }
     }

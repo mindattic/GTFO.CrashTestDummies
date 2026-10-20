@@ -46,8 +46,7 @@ internal static class DoorAmbush
                 Settings.AmbushSkipFirstMeters.Value,
                 Settings.AmbushMaxDistanceMeters.Value,
                 Settings.MinSpacingMeters.Value,
-                Settings.AmbushCount.Value,
-                point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value)));
+                Settings.AmbushCount.Value));
     }
 
     // A security door's gate is built from the area the players come from (m_linksFrom) into the first

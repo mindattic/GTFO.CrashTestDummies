@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 
-# Thunderstore's manifest "name" can't contain a period, so it differs from the DLL/folder name.
+# The DLL/folder name. Thunderstore's manifest "name" can't contain a period, so that one differs.
 $displayName = "GTFO.CrashTestDummies"
 $manifest = Get-Content "$root\package\manifest.json" -Raw | ConvertFrom-Json
 $version = $manifest.version_number

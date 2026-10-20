@@ -87,10 +87,13 @@ The other sections, all bound in `src/GTFO.CrashTestDummies/Config.cs`:
 ## How it works
 
 All three triggers share the same core routine (`EnemySpawner.SpawnAround`): gather candidate spots
-from every room (`AIG_CourseNode.s_allNodes`) near an origin point, optionally drop any that fail an
-`isAllowed` predicate, shuffle what's left, and keep up to `count` that are between `skipMeters` and
-`maxMeters` of that origin and at least `MinSpacingMeters` apart. What differs between triggers is the
-origin and the distance/count settings; all three pass the shared visibility check as `isAllowed`.
+from every room (`AIG_CourseNode.s_allNodes`) near an origin point: each room's designer-placed
+`LG_Area.m_enemySpawnPoints` (with their authored facing) plus a few `GetRandomPositionInside()`
+points. Drop any outside the `skipMeters`-`maxMeters` band or currently visible to a player (the
+shared `Visibility` check), shuffle what's left, and let `SpawnPicker` keep up to `count` that are at
+least `MinSpacingMeters` apart. Each is spawned with `EnemyAllocator.Current.SpawnEnemy` on its own
+room's course node, in `Hibernate` mode unless `SpawnAsSleepers` is off. What differs between
+triggers is only the origin and the distance/count settings.
 `count` is also clamped so `EnemyCleanup.AliveCount` (how many of this mod's dummies are currently
 alive) never exceeds `MaxTotalEnemies` - a steady-state population cap, not a one-time budget.
 
@@ -113,19 +116,19 @@ population cap, regardless of how aggressively `Ambient.*` is tuned.
 drop point):
 
 - A prefix on `LevelGeneration.Builder.Build` resets a once-per-expedition flag.
-- A postfix on `GS_InLevel.Enter` fires once the cage has landed and you're standing in the first zone. (Not `LocalPlayerAgent.Setup`: the player agent already exists in the elevator while the level is still generating, so it has no course node yet.) On the host only (`SNet.IsMaster`), it starts a coroutine that waits `SpawnDelaySeconds`, then gathers candidate spots from every room near the drop point: each room's designer-placed `LG_Area.m_enemySpawnPoints` (with their authored facing) plus a few `GetRandomPositionInside()` points. `SpawnPicker` keeps up to `SpawnCount` of the shuffled candidates within the band and spacing. Each is spawned with `EnemyAllocator.Current.SpawnEnemy` on its own room's course node, in `Hibernate` mode unless `SpawnAsSleepers` is off.
+- A postfix on `GS_InLevel.Enter` fires once the cage has landed and you're standing in the first zone. (Not `LocalPlayerAgent.Setup`: the player agent already exists in the elevator while the level is still generating, so it has no course node yet.) On the host only (`SNet.IsMaster`), it starts a coroutine that waits `SpawnDelaySeconds`, then runs `SpawnAround` centered on the drop point.
 - The dummy type comes from `GameDataBlockBase<EnemyDataBlock>`, limited to enabled blocks with a built prefab: of those whose name contains `EnemyNameFilter` (default `Striker_Hibernate`, the plain sleeping Striker), the one with the lowest max health is used. If nothing matches, it uses the weakest enemy in the game data. The chosen type is logged to `BepInEx/LogOutput.log`.
 
 **On each alarm door** (`AmbushCount`/`AmbushSkipFirstMeters`/`AmbushMaxDistanceMeters`, default
 20 / 10 m / 100 m from the far side of that door, wherever it is in the level):
 
 - A postfix on `LevelGeneration.LG_SecurityDoor.OnSyncDoorStatusChange` watches every door's networked status. `DoorAmbush` doesn't keep each door's last `eDoorStatus` (an alarm door passes through puzzle-activated, unlocked and opening on its way to open): it only remembers, by Unity instance ID, which doors it has seen `Closed_LockedWithChainedPuzzle_Alarm` (an alarm-scan lock). When one of those reaches `Open` it's forgotten, so each door ambushes once. On that open (host only), "the other side" is the room the door leads into: the gate's `m_linksTo` area (the first area of the zone it unlocks; `m_linksFrom` is the side players come from), cross-checked against `LG_Zone.m_sourceGate`, and its `m_courseNode`. Where the players are standing doesn't matter.
-- It then calls the same `EnemySpawner.SpawnAround` routine as the level-start scatter, but centered on that far node instead of the drop point, using the `Ambush.*` distance/count settings and the shared visibility filter. `MinSpacingMeters`, `EnemyNameFilter` and `SpawnAsSleepers` are shared across all triggers.
+- It then calls the same `EnemySpawner.SpawnAround` routine as the level-start scatter, but centered on that far node instead of the drop point, using the `Ambush.*` distance/count settings. `MinSpacingMeters`, `EnemyNameFilter` and `SpawnAsSleepers` are shared across all triggers.
 
 **Ambient trickle** (`AmbientSpawner.cs`; `AmbientCountMin`/`AmbientCountMax`/`AmbientSkipFirstMeters`/
 `AmbientMaxDistanceMeters`, default 50-100 / 10 m / 100 m from the local player):
 
-- An infinite coroutine loops `yield return new WaitForSeconds(AmbientIntervalSeconds)` (default 60), then calls `SpawnAround` centered on the local player's current position with a random count in `[AmbientCountMin, AmbientCountMax]` and the shared visibility filter as `isAllowed`.
+- An infinite coroutine loops `yield return new WaitForSeconds(AmbientIntervalSeconds)` (default 60), then calls `SpawnAround` centered on the local player's current position with a random count in `[AmbientCountMin, AmbientCountMax]`.
 - Started from `StartupSequence` only after the on-drop scatter finishes (and only if the level hasn't ended meanwhile).
 
 **Cleanup** (`EnemyCleanup.cs`; `CleanupCheckIntervalSeconds`/`CleanupAfterSeconds`, default 30 s / 300 s):

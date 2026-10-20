@@ -78,7 +78,7 @@ internal static class LevelPatches
     }
 
     // Runs the initial drop-point scatter to completion before the ambient spawner or cleanup loop get a
-    // chance to touch the population cap, so the initial 100 is never starved by a low AmbientIntervalSeconds.
+    // chance to touch the population cap, so it's never starved by a low AmbientIntervalSeconds.
     private static IEnumerator StartupSequence(PlayerAgent localAgent, int run)
     {
         // Safety-wrapped: an exception thrown mid-scatter must not skip the statements below it and

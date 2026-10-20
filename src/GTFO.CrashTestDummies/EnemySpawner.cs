@@ -43,22 +43,20 @@ internal static class EnemySpawner
             Settings.SkipFirstMeters.Value,
             Settings.MaxDistanceMeters.Value,
             Settings.MinSpacingMeters.Value,
-            Settings.SpawnCount.Value,
-            point => Visibility.IsHiddenFromAllPlayers(point, Settings.OutOfSightHalfAngleDegrees.Value));
+            Settings.SpawnCount.Value);
     }
 
     /// <summary>
     /// Host-only: scatters up to <paramref name="count"/> enemies between <paramref name="skipMeters"/> and
     /// <paramref name="maxMeters"/> from <paramref name="origin"/>, at the level's own enemy spawn spots and
     /// random walkable points in nearby rooms. Shared by the level-start scatter, the door-triggered ambush,
-    /// and the periodic ambient spawn. <paramref name="isAllowed"/>, if given, drops any candidate spot it
-    /// rejects (e.g. spots currently in a player's view) before spots are picked. <paramref name="count"/>
+    /// and the periodic ambient spawn. Any candidate spot a player can currently see is dropped before
+    /// spots are picked, so nothing visibly pops in. <paramref name="count"/>
     /// is clamped so the number of dummies <see cref="EnemyCleanup"/> is currently tracking as alive never
     /// exceeds <c>MaxTotalEnemies</c> - a steady-state population cap, not a one-time budget.
     /// </summary>
     public static IEnumerator SpawnAround(
-        Vector3 origin, float skipMeters, float maxMeters, float minSpacing, int count,
-        Func<Vector3, bool>? isAllowed = null)
+        Vector3 origin, float skipMeters, float maxMeters, float minSpacing, int count)
     {
         var target = GetTargetEnemy();
         if (target == null)
@@ -78,19 +76,18 @@ internal static class EnemySpawner
         var cappedCount = Math.Min(count, remaining);
 
         var mode = Settings.SpawnAsSleepers.Value ? AgentMode.Hibernate : AgentMode.Agressive;
-        // Drop spots outside the distance band before the (raycasting, per-player) isAllowed check, so
+        // Drop spots outside the distance band before the (raycasting, per-player) visibility check, so
         // it only runs on spots SpawnPicker could actually use.
         var minSqr = skipMeters > 0f ? skipMeters * skipMeters : 0f;
         var maxSqr = maxMeters * maxMeters;
+        var halfAngle = Settings.OutOfSightHalfAngleDegrees.Value;
         var spots = GatherSpawnSpots(origin, maxMeters)
             .Where(s =>
             {
                 var sqr = (s.Position - origin).sqrMagnitude;
-                return sqr >= minSqr && sqr <= maxSqr;
+                return sqr >= minSqr && sqr <= maxSqr && Visibility.IsHiddenFromAllPlayers(s.Position, halfAngle);
             })
             .ToList();
-        if (isAllowed != null)
-            spots = spots.Where(s => isAllowed(s.Position)).ToList();
         Shuffle(spots);
 
         var picks = SpawnPicker.Pick(
