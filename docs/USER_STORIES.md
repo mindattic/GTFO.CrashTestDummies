@@ -6,7 +6,7 @@ layer: stories
 status: living
 updated: 2026-10-16
 ---
-<!-- GENERATED from MindAttic.Workflow/data/workflow.db by `workflow db render`. Do not edit: this file is rewritten from the database; change stories and tickets with the workflow CLI. -->
+<!-- GENERATED from MindAttic.Tickets/data/Tickets.db by `tickets db render`. Do not edit: this file is rewritten from the database; change stories and tickets with the tickets CLI. -->
 
 # GTFO.CrashTestDummies — User Stories
 > ✅ done (shipped & tested) · 🟡 partial · ⬜ planned. Every ✅ cites the test.
@@ -58,3 +58,4 @@ _Nothing recorded yet._
 | G.CTD-T35 | 2026-10-19 | chore | open | Convert tracked source files to LF line endings via .gitattributes, per HOUSE-LAW-13 (low priority) | — |
 | G.CTD-T36 | 2026-10-19 | fix | closed | A host that enters the level without a local player agent spent the once-per-expedition gate and returned before marking the expedition started, so the ambient and cleanup loops never ran that expedition, not even after a checkpoint reload; now the loops start and only the drop-point scatter is skipped | 47588d8 |
 | G.CTD-T37 | 2026-10-20 | chore | closed | Bump GTFO.CrashTestDummies to v4.0.0 for release: changelog for the no-local-player loops fix (user request) | 9d3aad3 |
+| G.CTD-T38 | 2026-10-20 | docs | open | Publish GTFO.CrashTestDummies docs to GitHub Pages via the shared Toolkit DocFX pipeline: run adopt-docs-site.ps1 (README.md as home page, docs/*.md as articles, API reference only where the code builds in CI), enable Pages with build_type=workflow, set the repo homepage URL, retire tools/build-readme.ps1 and README.htm, confirm the docs Actions run is green and https://mindattic.github.io/GTFO.CrashTestDummies/ returns 200. Depends on MAT-T8. | — |
