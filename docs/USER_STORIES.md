@@ -61,3 +61,4 @@ _Nothing recorded yet._
 | G.CTD-T38 | 2026-10-20 | docs | open | Publish GTFO.CrashTestDummies docs to GitHub Pages via the shared Agency DocFX pipeline: run adopt-docs-site.ps1 (README.md as home page, docs/*.md as articles, API reference only where the code builds in CI), enable Pages with build_type=workflow, set the repo homepage URL, retire tools/build-readme.ps1 and README.htm, confirm the docs Actions run is green and https://mindattic.github.io/GTFO.CrashTestDummies/ returns 200. Depends on MAT-T8. | — |
 | G.CTD-T39 | 2026-10-22 | docs | closed | Update USER_STORIES.md | — |
 | G.CTD-T40 | 2026-10-24 | docs | closed | Update USER_STORIES.md | — |
+| G.CTD-T41 | 2026-10-24 | chore | closed | Joins the GTFO.EZ family's v17 release: removes Insert/Delete infinite ammo/health (out of scope, drops the GTFO.EZ.Shared submodule dependency entirely), fixes a missing exception guard in the cleanup loop, refreshes the README | EnemyCleanup.cs |

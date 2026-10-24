@@ -24,14 +24,6 @@ fighting) and is currently out of sight gets quietly recycled, freeing its slot 
 keeps refilling with fresh dummies instead of permanently maxing out and going quiet for the rest of
 the run.
 
-## Infinite ammo and health
-
-**Insert** toggles infinite ammo (every gun and tool stays full, no reloads) and **Delete** infinite
-health (no damage to you; bots and teammates are unaffected), each announced in the event log.
-Both start off. They're the same two keys every GTFO.* mod has, from one shared copy of the code
-written in GTFO.EZ; with several of the mods installed, only one answers, so a press never toggles
-twice.
-
 ## Config
 
 `BepInEx/config/MindAttic.GTFO.CrashTestDummies.cfg`:

@@ -1,5 +1,18 @@
 # Changelog
 
+## v17
+
+- **Joins the GTFO.EZ family's `vN` versioning scheme** (previously numbered independently; last
+  independent version was v4), so a matching version number across every GTFO.* mod is easy to spot.
+- **Removed: Insert/Delete infinite ammo/health.** Out of scope for a mod whose whole job is
+  spawning test targets - GTFO.EZ and its Absurd companions already carry it. The
+  `GTFO.EZ.Shared` submodule dependency is gone entirely along with it, since nothing else in this
+  mod used it.
+- **Bug fix:** the cleanup loop that recycles forgotten dummies had no exception safety, unlike
+  every other long-running routine in this mod - a bad agent (a destroyed replicator, a torn-down
+  camera) could throw and silently stop cleanup for the rest of the level, with the population cap
+  never refilling again. Wrapped the same way as the rest.
+
 ## v4
 
 - **Bug fix:** a host who entered a level without a local player got no ambient scatter and no

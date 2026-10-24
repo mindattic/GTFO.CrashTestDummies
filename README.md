@@ -2,7 +2,7 @@
 
 A BepInEx mod for GTFO that keeps up to 300 sleeping Strikers alive around you, always spawned and recycled out of sight, so you always have targets to sneak up on or shoot while testing other mods.
 
-[![C#](https://img.shields.io/badge/language-C%23-239120)](src/GTFO.CrashTestDummies) [![.NET 6](https://img.shields.io/badge/.NET-6.0-512BD4)](src/GTFO.CrashTestDummies/GTFO.CrashTestDummies.csproj) [![BepInEx IL2CPP](https://img.shields.io/badge/BepInEx-IL2CPP-orange)](package/manifest.json) [![Version 3](https://img.shields.io/badge/version-4.0.0-blue)](package/CHANGELOG.md) [![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](#license)
+[![C#](https://img.shields.io/badge/language-C%23-239120)](src/GTFO.CrashTestDummies) [![.NET 6](https://img.shields.io/badge/.NET-6.0-512BD4)](src/GTFO.CrashTestDummies/GTFO.CrashTestDummies.csproj) [![BepInEx IL2CPP](https://img.shields.io/badge/BepInEx-IL2CPP-orange)](package/manifest.json) [![Version 17](https://img.shields.io/badge/version-17.0.0-blue)](package/CHANGELOG.md) [![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](#license)
 
 ```text
             drop point                 alarm door opens               every 60 s
@@ -18,7 +18,7 @@ A BepInEx mod for GTFO that keeps up to 300 sleeping Strikers alive around you, 
 ```
 
 Try it: run `build.ps1` to build into a Thunderstore Mod Manager profile and package
-`dist/GTFO.CrashTestDummies-4.0.0.zip` (Thunderstore package name `GtfoCrashTestDummies`).
+`dist/GTFO.CrashTestDummies-17.0.0.zip` (Thunderstore package name `GtfoCrashTestDummies`).
 
 ## Why
 
@@ -40,8 +40,6 @@ Try it: run `build.ps1` to build into a Thunderstore Mod Manager profile and pac
 
 **A population cap, not a one-time budget.** Up to 300 of this mod's dummies may be alive at once, across all three triggers. Every 30 seconds, any dummy alive 5+ minutes that is still untouched (unhurt and not fighting) and out of sight is despawned through the game's network replicator, freeing its slot for fresh dummies.
 
-**Infinite ammo and health hotkeys.** Insert toggles infinite ammo and Delete toggles infinite health (yours only), each announced in the event log. Both start off. These are the same two keys every GTFO.* mod has, compiled in from the shared GTFO.EZ.Shared code; with several of the mods installed, only one answers, so a press never toggles twice.
-
 **Host only, level-scoped.** Only the host spawns or recycles enemies. Every routine stops when the level ends (success, fail, abort to lobby or checkpoint reload), and the ambient trickle and cleanup restart after a checkpoint reload; the drop-point scatter does not repeat.
 
 ## Quick start
@@ -49,20 +47,14 @@ Try it: run `build.ps1` to build into a Thunderstore Mod Manager profile and pac
 You need GTFO with BepInExPack_GTFO 3.2.3 in a Thunderstore Mod Manager profile that has been launched once (so `BepInEx/interop` exists), and the .NET 6 SDK.
 
 ```powershell
-git clone --recurse-submodules https://github.com/mindattic/GTFO.CrashTestDummies.git
+git clone https://github.com/mindattic/GTFO.CrashTestDummies.git
 cd GTFO.CrashTestDummies
 .\build.ps1                      # builds into the "Easy Mode DEV" profile
 .\build.ps1 -Profile MyProfile   # or into another profile
 ```
 
-Already cloned without submodules? Fetch the shared code first:
-
-```powershell
-git submodule update --init
-```
-
 Launch any rundown from that profile. `BepInEx/LogOutput.log` should show
-`GTFO.CrashTestDummies v4.0.0 loaded`, then on landing the chosen dummy type and
+`GTFO.CrashTestDummies v17.0.0 loaded`, then on landing the chosen dummy type and
 `spawning 100x 'Striker_Hibernate' (Hibernate).`
 
 ## Configuration
@@ -72,7 +64,7 @@ and what it does is in [package/README.md](package/README.md#config). The first 
 
 | Setting | Default | What it does |
 |---|---|---|
-| `[0. Mod] Enabled` | `true` | Turn the whole mod on or off. When false, `Plugin.Load` logs one line and returns before binding anything else, adding the coroutine host or patching, so nothing of the mod runs (Insert/Delete included). `0. Mod` sorts ahead of every other section, so it's the file's first entry. It replaces the old `[General] Enabled`, which only gated spawning: `Settings.BindMasterSwitch` carries a saved `false` over and removes the old key. |
+| `[0. Mod] Enabled` | `true` | Turn the whole mod on or off. When false, `Plugin.Load` logs one line and returns before binding anything else, adding the coroutine host or patching, so nothing of the mod runs. `0. Mod` sorts ahead of every other section, so it's the file's first entry. It replaces the old `[General] Enabled`, which only gated spawning: `Settings.BindMasterSwitch` carries a saved `false` over and removes the old key. |
 
 The other sections, all bound in `src/GTFO.CrashTestDummies/Config.cs`:
 
@@ -157,13 +149,9 @@ TheArchive, and checked against the interop assemblies in the DEV profile.
 
 ```text
 src/GTFO.CrashTestDummies/        the plugin project (Harmony patches, game calls)
-  Shared/                         linked from external/GTFO.EZ.Shared (a git submodule; change it
-                                  there): SharedOwner, the Insert/Delete infinite ammo/health toggles
-                                  and MessageHelper (on-screen messages)
 src/GTFO.CrashTestDummies.Core/   pure spawn logic, no game dependency: spot picking, enemy-type
                                   selection, once-per-level gate; ships alongside the plugin DLL
 tests/                            GTFO.CrashTestDummies.Core.Tests - NUnit, plain dotnet test, no game needed
-external/GTFO.EZ.Shared/          git submodule: code every GTFO.* mod compiles in
 package/                          what ships to Thunderstore / gets zipped (manifest name "GtfoCrashTestDummies")
   icon.png                        256x256, resized from reference/logo-1254x1254.png
 reference/                        source art
@@ -173,8 +161,7 @@ build.ps1                         builds into the profile and packages dist/GTFO
 ## Building
 
 Requires BepInExPack_GTFO in a Thunderstore Mod Manager profile that has been launched once, so
-`BepInEx/interop` exists (this project compiles against the game's interop assemblies), and the
-`external/GTFO.EZ.Shared` submodule checked out.
+`BepInEx/interop` exists (this project compiles against the game's interop assemblies).
 
 ```powershell
 .\build.ps1                      # Thunderstore Mod Manager profile "Easy Mode DEV"
@@ -202,7 +189,7 @@ untested by `dotnet test` and only verifiable in-game.
 
 The Harmony patches and game calls in `src/GTFO.CrashTestDummies/` only run inside the game, so
 check those in-game after `build.ps1`: launch any rundown in the profile. `LogOutput.log` should show
-`GTFO.CrashTestDummies v4.0.0 loaded`, then on landing the chosen dummy type and
+`GTFO.CrashTestDummies v17.0.0 loaded`, then on landing the chosen dummy type and
 `spawning 100x 'Striker_Hibernate' (Hibernate).` Open an alarm-locked security door and it should log
 `alarm door opened - ambushing the far side near ...`, then `spawning 20x 'Striker_Hibernate' (Hibernate).`
 About a minute later it should log another `spawning Nx 'Striker_Hibernate' (Hibernate).` (N between 50
@@ -212,8 +199,10 @@ dummy should ever appear to pop in or out while you're looking at the spot it oc
 
 ## Versioning
 
-Major-only bumps (v1, v2, ...), written as `1.0.0` in `manifest.json`. The current version is v4; what
-changed in each is in [package/CHANGELOG.md](package/CHANGELOG.md).
+Major-only bumps (v1, v2, ...), written as `N.0.0` in `manifest.json`. As of v17 this mod is on the
+same `vN` scheme as the GTFO.EZ family and GTFO.EZ.Shared, rather than numbering its own releases
+independently - a matching version number across every GTFO.* mod is easy to spot. What changed in
+each version is in [package/CHANGELOG.md](package/CHANGELOG.md).
 
 ## Publishing to Thunderstore
 
@@ -238,4 +227,4 @@ changed in each is in [package/CHANGELOG.md](package/CHANGELOG.md).
 This repo has no LICENSE file; all rights reserved. The spawn API and patch points were learned from
 ExtraEnemyCustomization and TheArchive.
 
-Part of [MindAttic](https://mindattic.com) — see more projects at [github.com/mindattic](https://github.com/mindattic). Related: [GTFO.EZ](https://github.com/mindattic/GTFO.EZ) and [GTFO.EZ.Shared](https://github.com/mindattic/GTFO.EZ.Shared).
+Part of [MindAttic](https://mindattic.com) — see more projects at [github.com/mindattic](https://github.com/mindattic). Related: [GTFO.EZ](https://github.com/mindattic/GTFO.EZ).

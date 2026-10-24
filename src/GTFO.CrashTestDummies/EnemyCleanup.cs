@@ -59,34 +59,44 @@ internal static class EnemyCleanup
             if (!Settings.CleanupEnabled.Value || !SNet.IsMaster)
                 continue;
 
-            var now = Time.time;
-            var removed = 0;
-            for (var i = Tracked.Count - 1; i >= 0; i--)
+            // Wrapped like every other forever-loop in this mod: a bad agent (a destroyed replicator, a
+            // torn-down camera) must not throw out of this while(true) and silently stop cleanup - and
+            // with it the population cap's recycling - for the rest of the level.
+            try
             {
-                var entry = Tracked[i];
-                if (entry.Agent == null || !entry.Agent.Alive)
+                var now = Time.time;
+                var removed = 0;
+                for (var i = Tracked.Count - 1; i >= 0; i--)
                 {
+                    var entry = Tracked[i];
+                    if (entry.Agent == null || !entry.Agent.Alive)
+                    {
+                        Tracked.RemoveAt(i);
+                        continue;
+                    }
+
+                    if (now - entry.SpawnTime < Settings.CleanupAfterSeconds.Value)
+                        continue;
+
+                    // Only untouched dummies are recycled: one that's been hurt or is fighting stays.
+                    if (!IsUntouched(entry.Agent))
+                        continue;
+
+                    if (!Visibility.IsHiddenFromAllPlayers(entry.Agent.transform.position, Settings.OutOfSightHalfAngleDegrees.Value))
+                        continue;
+
+                    entry.Agent.m_replicator?.Despawn();
                     Tracked.RemoveAt(i);
-                    continue;
+                    removed++;
                 }
 
-                if (now - entry.SpawnTime < Settings.CleanupAfterSeconds.Value)
-                    continue;
-
-                // Only untouched dummies are recycled: one that's been hurt or is fighting stays.
-                if (!IsUntouched(entry.Agent))
-                    continue;
-
-                if (!Visibility.IsHiddenFromAllPlayers(entry.Agent.transform.position, Settings.OutOfSightHalfAngleDegrees.Value))
-                    continue;
-
-                entry.Agent.m_replicator?.Despawn();
-                Tracked.RemoveAt(i);
-                removed++;
+                if (removed > 0)
+                    Plugin.Logger.LogInfo($"CrashTestDummies: recycled {removed} forgotten dummies ({AliveCount} still alive).");
             }
-
-            if (removed > 0)
-                Plugin.Logger.LogInfo($"CrashTestDummies: recycled {removed} forgotten dummies ({AliveCount} still alive).");
+            catch (Exception e)
+            {
+                Plugin.Logger.LogError($"CrashTestDummies: cleanup sweep failed and was skipped this pass: {e}");
+            }
         }
     }
 }
