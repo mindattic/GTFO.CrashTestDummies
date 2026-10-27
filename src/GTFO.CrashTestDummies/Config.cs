@@ -26,6 +26,10 @@ internal static class Settings
     public static ConfigEntry<bool> CleanupEnabled = null!;
     public static ConfigEntry<float> CleanupCheckIntervalSeconds = null!;
     public static ConfigEntry<float> CleanupAfterSeconds = null!;
+    public static ConfigEntry<bool> PerformanceGuardEnabled = null!;
+    public static ConfigEntry<float> MinAcceptableFPS = null!;
+    public static ConfigEntry<float> PerformanceCheckIntervalSeconds = null!;
+    public static ConfigEntry<int> PerformanceDespawnBatchSize = null!;
 
     /// <summary>
     /// Binds the master switch, the cfg's first entry ("0. Mod" sorts ahead of every other section),
@@ -53,11 +57,11 @@ internal static class Settings
     public static void Bind(ConfigFile config)
     {
         MaxTotalEnemies = config.Bind(
-            "General", "MaxTotalEnemies", 300,
+            "General", "MaxTotalEnemies", 100,
             "Population cap: how many of this mod's dummies may be alive at once, combined across the " +
             "drop-point scatter, alarm-door ambushes and the ambient scatter. It's a ceiling on the " +
-            "current count, not a lifetime total - as dummies die or get recycled by the Cleanup settings, " +
-            "room opens up for more to spawn.");
+            "current count, not a lifetime total - as dummies die or get recycled by the Cleanup or " +
+            "Performance settings, room opens up for more to spawn.");
 
         OutOfSightHalfAngleDegrees = config.Bind(
             "General", "OutOfSightHalfAngleDegrees", 70f,
@@ -154,5 +158,27 @@ internal static class Settings
             "Cleanup", "CleanupAfterSeconds", 300f,
             "A dummy is only eligible to be recycled once it has been alive this long (seconds) and is " +
             "currently out of sight - it's never removed while a player might be looking at it.");
+
+        PerformanceGuardEnabled = config.Bind(
+            "Performance", "PerformanceGuardEnabled", true,
+            "Self-management safety valve: if the host's framerate drops below MinAcceptableFPS, " +
+            "immediately recycle some currently out-of-sight dummies (regardless of age) to claw back " +
+            "performance, so the mod never becomes the reason the game chugs. Never touches a dummy a " +
+            "player might be looking at.");
+
+        MinAcceptableFPS = config.Bind(
+            "Performance", "MinAcceptableFPS", 45f,
+            "If the host's average framerate over a PerformanceCheckIntervalSeconds window falls below " +
+            "this, the performance guard kicks in and starts despawning unseen dummies.");
+
+        PerformanceCheckIntervalSeconds = config.Bind(
+            "Performance", "PerformanceCheckIntervalSeconds", 5f,
+            "How often, in seconds, to measure the average framerate and react if it's too low (at least 1).");
+
+        PerformanceDespawnBatchSize = config.Bind(
+            "Performance", "PerformanceDespawnBatchSize", 25,
+            "How many unseen dummies to recycle, oldest first, each time the framerate is measured below " +
+            "MinAcceptableFPS. Repeats every check interval until the framerate recovers or there are no " +
+            "more unseen dummies left to remove.");
     }
 }

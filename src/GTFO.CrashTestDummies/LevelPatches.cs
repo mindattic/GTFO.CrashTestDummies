@@ -106,6 +106,7 @@ internal static class LevelPatches
         var run = LevelRoutines.Run;
         LevelRoutines.Start(AmbientSpawner.Routine(run));
         LevelRoutines.Start(EnemyCleanup.Routine(run));
+        LevelRoutines.Start(PerformanceGuard.Routine(run));
     }
 
     [HarmonyPatch(typeof(LG_SecurityDoor), nameof(LG_SecurityDoor.OnSyncDoorStatusChange))]

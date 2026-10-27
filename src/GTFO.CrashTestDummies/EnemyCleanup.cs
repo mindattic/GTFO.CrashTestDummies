@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Enemies;
 using SNetwork;
 using UnityEngine;
@@ -36,6 +37,42 @@ internal static class EnemyCleanup
     }
 
     public static void ResetForNewExpedition() => Tracked.Clear();
+
+    /// <summary>
+    /// Emergency release valve for <see cref="PerformanceGuard"/>: immediately recycles up to
+    /// <paramref name="maxCount"/> tracked dummies that are currently hidden from every player, oldest
+    /// first, regardless of how long they've been alive or whether they're mid-fight. Unlike the
+    /// age-gated sweep in <see cref="Routine"/>, this doesn't wait for CleanupAfterSeconds or require
+    /// the dummy to be untouched - it only has to be out of sight, so framerate recovery never costs a
+    /// player a dummy they can actually see. Returns how many were recycled.
+    /// </summary>
+    public static int DespawnHiddenEnemies(int maxCount)
+    {
+        if (maxCount <= 0)
+            return 0;
+
+        var halfAngle = Settings.OutOfSightHalfAngleDegrees.Value;
+        var candidates = Tracked
+            .Where(t => t.Agent != null && t.Agent.Alive)
+            .OrderBy(t => t.SpawnTime)
+            .ToList();
+
+        var removed = 0;
+        foreach (var entry in candidates)
+        {
+            if (removed >= maxCount)
+                break;
+
+            if (!Visibility.IsHiddenFromAllPlayers(entry.Agent.transform.position, halfAngle))
+                continue;
+
+            entry.Agent.m_replicator?.Despawn();
+            Tracked.Remove(entry);
+            removed++;
+        }
+
+        return removed;
+    }
 
     private static bool IsUntouched(EnemyAgent agent)
     {

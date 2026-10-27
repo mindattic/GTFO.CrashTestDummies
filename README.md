@@ -1,8 +1,8 @@
 # GTFO.CrashTestDummies
 
-A BepInEx mod for GTFO that keeps up to 300 sleeping Strikers alive around you, always spawned and recycled out of sight, so you always have targets to sneak up on or shoot while testing other mods.
+A BepInEx mod for GTFO that keeps up to 100 sleeping Strikers alive around you, always spawned and recycled out of sight, so you always have targets to sneak up on or shoot while testing other mods.
 
-[![C#](https://img.shields.io/badge/language-C%23-239120)](src/GTFO.CrashTestDummies) [![.NET 6](https://img.shields.io/badge/.NET-6.0-512BD4)](src/GTFO.CrashTestDummies/GTFO.CrashTestDummies.csproj) [![BepInEx IL2CPP](https://img.shields.io/badge/BepInEx-IL2CPP-orange)](package/manifest.json) [![Version 17](https://img.shields.io/badge/version-17.0.0-blue)](package/CHANGELOG.md) [![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](#license)
+[![C#](https://img.shields.io/badge/language-C%23-239120)](src/GTFO.CrashTestDummies) [![.NET 6](https://img.shields.io/badge/.NET-6.0-512BD4)](src/GTFO.CrashTestDummies/GTFO.CrashTestDummies.csproj) [![BepInEx IL2CPP](https://img.shields.io/badge/BepInEx-IL2CPP-orange)](package/manifest.json) [![Version 18](https://img.shields.io/badge/version-18.0.0-blue)](package/CHANGELOG.md) [![License](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](#license)
 
 ```text
             drop point                 alarm door opens               every 60 s
@@ -12,13 +12,15 @@ A BepInEx mod for GTFO that keeps up to 300 sleeping Strikers alive around you, 
                 \                             |                            /
                  +----------- out-of-sight check (every player) ----------+
                                               |
-                          population cap: 300 alive at once
+                          population cap: 100 alive at once
                                               |
                cleanup every 30 s: untouched, unseen, 5+ min old -> despawned
+                                              |
+                 performance guard every 5 s: FPS < 45 -> unseen despawned now
 ```
 
 Try it: run `build.ps1` to build into a Thunderstore Mod Manager profile and package
-`dist/GTFO.CrashTestDummies-17.0.0.zip` (Thunderstore package name `GtfoCrashTestDummies`).
+`dist/GTFO.CrashTestDummies-18.0.0.zip` (Thunderstore package name `GtfoCrashTestDummies`).
 
 ## Why
 
@@ -38,7 +40,9 @@ Try it: run `build.ps1` to build into a Thunderstore Mod Manager profile and pac
 
 **Never seen popping in or out.** A spot is hidden from the host if it's more than 70 degrees off the centre of their view, or something blocks line of sight to it. The host can't tell which way other players and bots are facing, so for them only a blocked line of sight hides a spot. A spot is used only when it's hidden from every player.
 
-**A population cap, not a one-time budget.** Up to 300 of this mod's dummies may be alive at once, across all three triggers. Every 30 seconds, any dummy alive 5+ minutes that is still untouched (unhurt and not fighting) and out of sight is despawned through the game's network replicator, freeing its slot for fresh dummies.
+**A population cap, not a one-time budget.** Up to 100 of this mod's dummies may be alive at once, across all three triggers. Every 30 seconds, any dummy alive 5+ minutes that is still untouched (unhurt and not fighting) and out of sight is despawned through the game's network replicator, freeing its slot for fresh dummies.
+
+**A framerate safety valve on top of that.** Every 5 seconds the host's actual average framerate is measured; if it's below 45, out-of-sight dummies are recycled immediately - oldest first, regardless of age or combat state - until framerate recovers or none are left unseen. Combined with the lower population cap, the mod self-manages so it can't become the reason your game chugs.
 
 **Host only, level-scoped.** Only the host spawns or recycles enemies. Every routine stops when the level ends (success, fail, abort to lobby or checkpoint reload), and the ambient trickle and cleanup restart after a checkpoint reload; the drop-point scatter does not repeat.
 
@@ -54,7 +58,7 @@ cd GTFO.CrashTestDummies
 ```
 
 Launch any rundown from that profile. `BepInEx/LogOutput.log` should show
-`GTFO.CrashTestDummies v17.0.0 loaded`, then on landing the chosen dummy type and
+`GTFO.CrashTestDummies v18.0.0 loaded`, then on landing the chosen dummy type and
 `spawning 100x 'Striker_Hibernate' (Hibernate).`
 
 ## Configuration
@@ -70,11 +74,12 @@ The other sections, all bound in `src/GTFO.CrashTestDummies/Config.cs`:
 
 | Section | Controls |
 |---|---|
-| `General` | `MaxTotalEnemies` (population cap, 300) and `OutOfSightHalfAngleDegrees` (view cone, 70) |
+| `General` | `MaxTotalEnemies` (population cap, 100) and `OutOfSightHalfAngleDegrees` (view cone, 70) |
 | `Spawning` | The on-drop scatter (count 100, 10-100 m, 2 s delay) plus `MinSpacingMeters`, `EnemyNameFilter` and `SpawnAsSleepers`, shared by every trigger |
 | `Ambush` | The alarm-door ambush (on, 20, 10-100 m) |
 | `Ambient` | The ambient trickle (on, every 60 s, 50-100, 10-100 m) |
 | `Cleanup` | Recycling (on, checked every 30 s, after 300 s) |
+| `Performance` | Framerate safety valve (on, checked every 5 s, below 45 FPS recycles up to 25 unseen dummies) |
 
 ## How it works
 
@@ -127,6 +132,21 @@ drop point):
 
 - Every spawned `EnemyAgent` (from all three triggers) is registered with `EnemyCleanup.Track` the moment `EnemyAllocator.Current.SpawnEnemy` returns it. `EnemyCleanup.AliveCount` prunes dead/null entries as it counts, and is what `SpawnAround` checks against `MaxTotalEnemies` before spawning.
 - A second infinite coroutine wakes every `CleanupCheckIntervalSeconds` and recycles any tracked dummy that's older than `CleanupAfterSeconds`, untouched (`AI.Mode` isn't `Agressive` and `Damage.Health` is still at `HealthMax`, so a hurt or fighting dummy - and, with `SpawnAsSleepers` off, every dummy - stays) and currently hidden (same `Visibility` check) by calling `agent.m_replicator.Despawn()` - the same `SNet_Replicator` method the game's own networked spawn/despawn lifecycle uses, so it's removed cleanly for every client, not just locally destroyed.
+
+**Performance Guard** (`PerformanceGuard.cs`; `PerformanceCheckIntervalSeconds`/`MinAcceptableFPS`/
+`PerformanceDespawnBatchSize`, default 5 s / 45 / 25):
+
+- A third infinite coroutine samples `Time.frameCount` and `Time.unscaledTime` at the start of each
+  wait and again after `WaitForSeconds(PerformanceCheckIntervalSeconds)`, so the frame delta divided
+  by the elapsed time is the host's actual average framerate over that window, not a single noisy
+  instantaneous reading.
+- If that average is below `MinAcceptableFPS`, it calls `EnemyCleanup.DespawnHiddenEnemies`, which
+  recycles up to `PerformanceDespawnBatchSize` tracked dummies that are currently hidden (the same
+  `Visibility` check as cleanup), oldest first - unlike the cleanup sweep, it doesn't wait for
+  `CleanupAfterSeconds` or require the dummy to be untouched, since the point is to claw back
+  performance right away. A dummy a player might be looking at is never touched.
+- Started from `StartLoops` alongside the ambient and cleanup loops, so it's on for the whole level
+  and restarts after a checkpoint reload the same way they do.
 
 **Level lifetime** (`LevelRoutines.cs`): `CoroutineHost` is a plugin-level component that outlives any
 single expedition, so every coroutine started for a level - the startup scatter, the ambient and cleanup
@@ -189,7 +209,7 @@ untested by `dotnet test` and only verifiable in-game.
 
 The Harmony patches and game calls in `src/GTFO.CrashTestDummies/` only run inside the game, so
 check those in-game after `build.ps1`: launch any rundown in the profile. `LogOutput.log` should show
-`GTFO.CrashTestDummies v17.0.0 loaded`, then on landing the chosen dummy type and
+`GTFO.CrashTestDummies v18.0.0 loaded`, then on landing the chosen dummy type and
 `spawning 100x 'Striker_Hibernate' (Hibernate).` Open an alarm-locked security door and it should log
 `alarm door opened - ambushing the far side near ...`, then `spawning 20x 'Striker_Hibernate' (Hibernate).`
 About a minute later it should log another `spawning Nx 'Striker_Hibernate' (Hibernate).` (N between 50

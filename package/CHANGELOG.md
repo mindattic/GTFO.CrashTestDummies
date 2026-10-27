@@ -1,5 +1,17 @@
 # Changelog
 
+## v18
+
+- **Lower default population cap: 300 -> 100.** `General.MaxTotalEnemies` now defaults to 100, a
+  size that stays comfortably out of the way of normal play instead of flooding the level.
+- **New: Performance Guard, a framerate-based safety valve.** Every `Performance.PerformanceCheckIntervalSeconds`
+  (default 5s), the host's actual average framerate since the last check is measured; if it's below
+  `Performance.MinAcceptableFPS` (default 45), up to `Performance.PerformanceDespawnBatchSize` (default 25)
+  currently out-of-sight dummies are recycled immediately, oldest first - regardless of age or combat
+  state, unlike the existing time-gated cleanup sweep. Never touches a dummy a player might be looking
+  at. Toggle with `Performance.PerformanceGuardEnabled`. Together with the lower population cap, this
+  makes the mod self-manage so it doesn't become a hindrance to gameplay even on weaker hardware.
+
 ## v17
 
 - **Joins the GTFO.EZ family's `vN` versioning scheme** (previously numbered independently; last

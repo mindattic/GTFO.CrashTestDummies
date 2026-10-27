@@ -17,12 +17,18 @@ Every spawn - all three triggers - only ever picks a spot no player can currentl
 host's view or behind a wall, and behind a wall for everyone else (the host can't tell which way
 other players and bots are facing), so nothing ever visibly pops in.
 
-**Population cap, not a one-time budget.** Up to 300 of this mod's dummies may be alive at once
+**Population cap, not a one-time budget.** Up to 100 of this mod's dummies may be alive at once
 (combined across all three triggers). It's a ceiling on the current count, not a lifetime total:
 every 30 seconds, any dummy that's been alive for 5+ minutes, is still untouched (unhurt and not
 fighting) and is currently out of sight gets quietly recycled, freeing its slot - so the population
 keeps refilling with fresh dummies instead of permanently maxing out and going quiet for the rest of
 the run.
+
+**Self-manages your framerate.** Every 5 seconds the host's actual average framerate is checked; if
+it dips below 45, out-of-sight dummies are recycled immediately (oldest first, regardless of age or
+combat state) until it recovers or there's nothing left unseen to remove. A dummy you can actually
+see is never touched. This is on top of the population cap and the time-based cleanup, so the mod
+can't become the reason your game chugs.
 
 ## Config
 
@@ -31,7 +37,7 @@ the run.
 | Setting | Default | Meaning |
 |---|---|---|
 | `0. Mod.Enabled` | `true` | Turn the whole mod on or off. When false, the mod loads nothing: no patches, no hotkeys, no dummies. It's the file's first entry, so the mod can be switched off where a mod manager profile doesn't list it. Takes effect on restart. Replaces the old `General.Enabled`; a saved `false` there carries over. |
-| `General.MaxTotalEnemies` | `300` | Population cap: how many of this mod's dummies may be alive at once, combined across all triggers. |
+| `General.MaxTotalEnemies` | `100` | Population cap: how many of this mod's dummies may be alive at once, combined across all triggers. |
 | `General.OutOfSightHalfAngleDegrees` | `70` | Used by every trigger and by cleanup: a spot is hidden from the host if it's outside this many degrees of the centre of their view, or something blocks line of sight to it. Other players and bots count as looking every way, so only a blocked line of sight hides a spot from them. |
 | `Spawning.SpawnCount` | `100` | How many enemies the on-drop scatter spawns. |
 | `Spawning.SkipFirstMeters` | `10` | Nothing spawns closer than this to the drop point. |
@@ -52,5 +58,9 @@ the run.
 | `Cleanup.CleanupEnabled` | `true` | Master switch for recycling forgotten dummies. |
 | `Cleanup.CleanupCheckIntervalSeconds` | `30` | How often, in seconds, to check for dummies to recycle (at least 1). |
 | `Cleanup.CleanupAfterSeconds` | `300` | A dummy is only recycled once it's been alive this long *and* is currently out of sight. One that's been hurt or is awake and fighting is never recycled (so with `SpawnAsSleepers` off, nothing is). |
+| `Performance.PerformanceGuardEnabled` | `true` | Master switch for the framerate-based safety valve. |
+| `Performance.MinAcceptableFPS` | `45` | If the host's average framerate over `PerformanceCheckIntervalSeconds` falls below this, unseen dummies start getting recycled immediately. |
+| `Performance.PerformanceCheckIntervalSeconds` | `5` | How often, in seconds, to measure the framerate and react if it's too low (at least 1). |
+| `Performance.PerformanceDespawnBatchSize` | `25` | How many out-of-sight dummies to recycle, oldest first, each time the framerate is measured below `MinAcceptableFPS`. Repeats every check until it recovers or there's nothing unseen left to remove. |
 
 Only the host spawns or recycles enemies.

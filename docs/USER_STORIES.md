@@ -62,3 +62,4 @@ _Nothing recorded yet._
 | G.CTD-T39 | 2026-10-22 | docs | closed | Update USER_STORIES.md | — |
 | G.CTD-T40 | 2026-10-24 | docs | closed | Update USER_STORIES.md | — |
 | G.CTD-T41 | 2026-10-24 | chore | closed | Joins the GTFO.EZ family's v17 release: removes Insert/Delete infinite ammo/health (out of scope, drops the GTFO.EZ.Shared submodule dependency entirely), fixes a missing exception guard in the cleanup loop, refreshes the README | EnemyCleanup.cs |
+| G.CTD-T42 | 2026-10-26 | feature | closed | Lower the default population cap to 100 and add a framerate-based Performance Guard that recycles unseen dummies when FPS dips, so the mod self-manages instead of risking becoming a hindrance to gameplay; bump to v18 and repackage dist | PerformanceGuard.cs |
